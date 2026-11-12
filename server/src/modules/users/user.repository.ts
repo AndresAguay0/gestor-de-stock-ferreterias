@@ -1,4 +1,4 @@
-import type { Includeable, Transaction } from "sequelize";
+import { Op, type Includeable, type Transaction } from "sequelize";
 import { HardwareStore } from "../../models/HardwareStore.js";
 import { User, type UserRole } from "../../models/User.js";
 import { UserStore } from "../../models/UserStore.js";
@@ -39,6 +39,14 @@ export class UserRepository {
         return User.scope("withPassword").findOne({ where: { email }, transaction: tx });
     }
 
+    async existsByEmail(email: string, excludeId?: number, tx?: Transaction) {
+        const count = await User.count({
+            where: excludeId === undefined ? { email } : { email, id: { [Op.ne]: excludeId } },
+            transaction: tx,
+        });
+        return count > 0;
+    }
+    
     create(data: NewUserData, tx?: Transaction) {
         return User.create(data, { transaction: tx });
     }
