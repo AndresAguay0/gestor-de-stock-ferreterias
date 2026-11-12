@@ -1,0 +1,27 @@
+import { AppError } from "../../shared/AppError.js";
+import { hashPassword, verifyPassword } from "../../shared/password.js";
+import { signToken } from "../../shared/token.js";
+import type { UserRepository } from "../users/user.repository.js";
+import type { LoginInput } from "./auth.schema.js";
+
+const dummyHash = hashPassword("contraseña-de-relleno");
+
+export class AuthService {
+    constructor(private readonly users: UserRepository) {}
+
+    async login(input: LoginInput) {
+        const account = await this.users.findByEmailWithPassword(input.email);
+        const hash = account?.getDataValue("passwordHash") ?? (await dummyHash);
+        const passwordOk = await verifyPassword(input.password, hash);
+
+        if (!account || !passwordOk) {
+            throw new AppError(401, "Email o contraseña incorrectos");
+        }
+        if (!account.isActive) {
+            throw new AppError(403, "Tu usuario está desactivado. Consultá con el dueño");
+        }
+
+        const user = await this.users.findById(account.id);
+        return { token: await signToken(account.id), user };
+    }
+}
