@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import sequelize from "./config/database.js";
+import { env } from "./config/env.js";
 
 // Modelos
 import "./models/HardwareStore.js";
@@ -14,7 +15,7 @@ import hardwareStoreRoutes from "./routes/hardwareStore.routes.js";
 import userRoutes from "./routes/user.routes.js"
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = env.PORT;
 
 app.use(cors());
 app.use(express.json());

@@ -1,8 +1,9 @@
 import { Sequelize } from "sequelize";
+import { env } from "./env.js";
 
 const sequelize = new Sequelize({
     dialect: "sqlite",
-    storage: "database.sqlite",
+    storage: env.DB_PATH,
     logging: false,
 });
 
