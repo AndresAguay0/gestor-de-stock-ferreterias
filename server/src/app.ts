@@ -1,10 +1,11 @@
 import express from "express";
 import cors from "cors";
 import { errorHandler, notFoundHandler } from "./shared/errorHandler.js";
-import { storeController } from "./container.js";
+import { authController, storeController } from "./container.js";
 
 // Rutas
 import productRoutes from "./routes/product.routes.js";
+import { createAuthRouter } from "./modules/auth/auth.routes.js";
 import { createStoreRouter } from "./modules/stores/store.routes.js";
 
 export const createApp = () => {
@@ -14,6 +15,7 @@ export const createApp = () => {
     app.use(express.json());
 
     // Uso de Rutas
+    app.use("/api/auth", createAuthRouter(authController));
     app.use("/api/products", productRoutes);
     app.use("/api/stores", createStoreRouter(storeController));
 
