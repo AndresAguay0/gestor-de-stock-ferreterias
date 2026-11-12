@@ -1,6 +1,7 @@
 import sequelize from "./config/database.js";
 import { env } from "./config/env.js";
 import { createApp } from "./app.js";
+import { migrator } from "./db/umzug.js";
 
 // Modelos
 import "./models/HardwareStore.js";
@@ -14,8 +15,8 @@ const startServer = async () => {
         await sequelize.authenticate();
         console.log("Conexión a la base de datos SQLite establecida con éxito");
 
-        await sequelize.sync({ alter: true });
-        console.log("Modelos sincronizados correctamente.");
+        await migrator.up();
+        console.log("Migraciones al día.");
 
         const app = createApp();
         app.listen(env.PORT, () => {
