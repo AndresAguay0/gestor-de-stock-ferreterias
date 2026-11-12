@@ -8,6 +8,7 @@ InferCreationAttributes<HardwareStore>
     declare id: CreationOptional<number>;
     declare name: string;
     declare address: string;
+    declare isActive: CreationOptional<boolean>;
 }
 
 HardwareStore.init(
@@ -24,7 +25,12 @@ HardwareStore.init(
         address: {
             type: DataTypes.STRING,
             allowNull: false,
-        }
+        },
+        isActive: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: true,
+        },
     },
     {
         sequelize,
