@@ -8,11 +8,19 @@ export const getProducts = async (req: Request, res: Response) => {
     try {
         // Campo opcional por id de Ferreteria
         const { hardwareStoreId } = req.query;
-        const whereCondition = hardwareStoreId ? { hardwareStoreId } : {};
+        const whereCondition: { hardwareStoreId?: number } = {};
+
+        if (hardwareStoreId !== undefined) {
+            const storeId = Number(hardwareStoreId);
+            if (!Number.isInteger(storeId) || storeId <= 0) {
+                return res.status(400).json({ msg: "hardwareStoreId debe ser un entero positivo" });
+            }
+            whereCondition.hardwareStoreId = storeId;
+        }
 
         const products = await Product.findAll({
             where: whereCondition,
-            include: [{model: HardwareStore, as: "hardwareStore" }]
+            include: [{ model: HardwareStore, as: "hardwareStore" }]
         });
         return res.json(products);
     } catch (error) {
