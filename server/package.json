@@ -16,9 +16,11 @@
     "migrate:status": "tsx src/db/migrate.ts status"
   },
   "dependencies": {
+    "bcryptjs": "3.0.3",
     "cors": "2.8.6",
     "dotenv": "17.4.2",
     "express": "5.2.1",
+    "jose": "6.2.17",
     "sequelize": "6.37.8",
     "sqlite3": "6.0.1",
     "umzug": "3.8.3",

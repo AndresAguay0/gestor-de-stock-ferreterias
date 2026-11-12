@@ -9,6 +9,8 @@ const defaultDbPath = fileURLToPath(new URL("../../database.sqlite", import.meta
 const envSchema = z.object({
     PORT: z.coerce.number().int().positive().default(4000),
     DB_PATH: z.string().min(1).default(defaultDbPath),
+    JWT_SECRET: z.string().min(32, "Debe tener al menos 32 caracteres"),
+    JWT_EXPIRES_IN: z.string().min(1).default("12h"),
 });
 
 const result = envSchema.safeParse(process.env);
