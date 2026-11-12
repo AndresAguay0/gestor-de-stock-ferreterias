@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { errorHandler, notFoundHandler } from "./shared/errorHandler.js";
 
 // Rutas
 import productRoutes from "./routes/product.routes.js";
@@ -21,6 +22,10 @@ export const createApp = () => {
     app.get("/", (_req, res) => {
         res.json({ message: "API de Sistema de Gestión de Stock Para Ferreterías funcionando."});
     });
+
+    // Manejadores de errores
+    app.use(notFoundHandler);
+    app.use(errorHandler);
 
     return app;
 };
