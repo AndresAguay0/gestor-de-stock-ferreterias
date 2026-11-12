@@ -1,9 +1,12 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize";
 import sequelize from "../config/database.js";
 
-export class UserHardwareStore extends Model {}
+export class UserStore extends Model<InferAttributes<UserStore>,InferCreationAttributes<UserStore>> {
+    declare userId: number;
+    declare hardwareStoreId: number;
+}
 
-UserHardwareStore.init(
+UserStore.init(
     {
         userId: {
             type: DataTypes.INTEGER,
@@ -16,7 +19,7 @@ UserHardwareStore.init(
     },
     {
         sequelize,
-        tableName: "user_hardware_stores",
+        tableName: "user_stores",
         timestamps: false,
-    },
+    }
 );

@@ -6,7 +6,7 @@ import { migrator } from "./db/umzug.js";
 // Modelos
 import "./models/HardwareStore.js";
 import "./models/User.js";
-import "./models/UserHardwareStore.js";
+import "./models/UserStore.js";
 import "./models/Product.js";
 
 // Sincronización de base de datos y levante del server

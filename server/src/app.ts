@@ -5,7 +5,6 @@ import { storeController } from "./container.js";
 
 // Rutas
 import productRoutes from "./routes/product.routes.js";
-import userRoutes from "./routes/user.routes.js"
 import { createStoreRouter } from "./modules/stores/store.routes.js";
 
 export const createApp = () => {
@@ -17,7 +16,6 @@ export const createApp = () => {
     // Uso de Rutas
     app.use("/api/products", productRoutes);
     app.use("/api/stores", createStoreRouter(storeController));
-    app.use("/api/users", userRoutes);
 
     // Ruta de prueba
     app.get("/", (_req, res) => {
