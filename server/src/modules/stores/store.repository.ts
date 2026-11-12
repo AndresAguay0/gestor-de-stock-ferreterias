@@ -15,6 +15,10 @@ export class StoreRepository {
         return HardwareStore.findByPk(id, { transaction: tx });
     }
 
+    findByIds(ids: number[], tx?: Transaction) {
+        return HardwareStore.findAll({ where: { id: ids }, transaction: tx });
+    }
+
     create(data: CreateStoreInput, tx?: Transaction) {
         return HardwareStore.create(data, { transaction: tx });
     }
