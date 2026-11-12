@@ -24,4 +24,10 @@ export class AuthService {
         const user = await this.users.findById(account.id);
         return { token: await signToken(account.id), user };
     }
+
+    async me(userId: number) {
+        const user = await this.users.findById(userId);
+        if (!user) throw new AppError(401, "Sesión inválida o vencida");
+        return user;
+    }
 }
