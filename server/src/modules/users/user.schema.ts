@@ -36,3 +36,5 @@ export const listUsersQuerySchema = z.object({
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
+
+export { email as emailSchema, password as passwordSchema };
