@@ -1,9 +1,9 @@
-import { Op, type Includeable, type Transaction } from "sequelize";
+import { Op, type IncludeOptions, type Transaction } from "sequelize";
 import { HardwareStore } from "../../models/HardwareStore.js";
 import { User, type UserRole } from "../../models/User.js";
 import { UserStore } from "../../models/UserStore.js";
 
-const includeStores: Includeable = {
+const includeStores: IncludeOptions = {
     model: HardwareStore,
     as: "stores",
     through: { attributes: [] },
@@ -33,6 +33,17 @@ export class UserRepository {
 
     findById(id: number, tx?: Transaction) {
         return User.findByPk(id, { include: [includeStores], transaction: tx });
+    }
+
+    async findActiveEmployeesInStore(storeIds: number[], tx?: Transaction) {
+        if (storeIds.length === 0) return [];
+
+        return User.findAll({
+            where: {role: "employee", isActive: true },
+            include: [{ ...includeStores, where: { id: storeIds }, required: true }],
+            order: [["email", "ASC"]],
+            transaction: tx,
+        });
     }
 
     findByEmailWithPassword(email: string, tx?: Transaction) {

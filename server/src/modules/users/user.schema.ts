@@ -26,6 +26,8 @@ export const updateUserSchema = z.object({
     message: "Enviá al menos un campo para actualizar",
 });
 
+export const reassignStoresSchema = z.object({ storeIds });
+
 export const listUsersQuerySchema = z.object({
     includeInactive: z
         .enum(["true", "false"])
