@@ -35,6 +35,10 @@ export class UserRepository {
         return User.findByPk(id, { include: [includeStores], transaction: tx });
     }
 
+    findByEmail(email: string, tx?: Transaction) {
+        return User.findOne({ where: { email }, transaction: tx });
+    }
+    
     async findActiveEmployeesInStore(storeIds: number[], tx?: Transaction) {
         if (storeIds.length === 0) return [];
 
