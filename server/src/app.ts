@@ -17,8 +17,8 @@ export const createApp = () => {
 
     // Uso de Rutas
     app.use("/api/auth", createAuthRouter(authController, authenticate));
-    app.use("/api/products", productRoutes);
-    app.use("/api/stores", createStoreRouter(storeController));
+    app.use("/api/products", authenticate, productRoutes);
+    app.use("/api/stores", createStoreRouter(storeController, authenticate));
     app.use("/api/users", createUserRouter(userController, authenticate));
 
     // Ruta de prueba
