@@ -14,7 +14,8 @@
     "migrate": "tsx src/db/migrate.ts up",
     "migrate:down": "tsx src/db/migrate.ts down",
     "migrate:status": "tsx src/db/migrate.ts status",
-    "create-owner": "tsx src/scripts/create-owner.ts"
+    "create-owner": "tsx src/scripts/create-owner.ts",
+    "reset-owner-password": "tsx src/scripts/reset-owner-password.ts"
   },
   "dependencies": {
     "bcryptjs": "3.0.3",
