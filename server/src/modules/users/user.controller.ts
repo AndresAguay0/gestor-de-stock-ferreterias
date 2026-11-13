@@ -34,4 +34,9 @@ export class UserController {
         );
         res.json(user);
     };
+
+    resetPassword = async (req: Request, res: Response) => {
+        await this.service.resetPassword(parseId(req.params.id), req.body.newPassword);
+        res.status(204).send();
+    };
 }

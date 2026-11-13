@@ -6,14 +6,14 @@ import { UserStore } from "./UserStore.js";
 export const USER_ROLES = ["owner", "manager", "employee"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
-export class User extends Model<
-InferAttributes<User>,
-InferCreationAttributes<User>> {
+export class User extends Model<InferAttributes<User>,InferCreationAttributes<User>> {
     declare id: CreationOptional<number>;
     declare email: string;
     declare passwordHash: string;
     declare role: CreationOptional<UserRole>;
     declare isActive: CreationOptional<boolean>;
+
+    declare tokenVersion: CreationOptional<number>;
 
     declare stores?: NonAttribute<HardwareStore[]>;
 
@@ -49,6 +49,11 @@ User.init(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: true,
+        },
+        tokenVersion: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
         },
     },
     {

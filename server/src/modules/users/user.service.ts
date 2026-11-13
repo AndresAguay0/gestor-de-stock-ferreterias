@@ -109,6 +109,16 @@ export class UserService {
         })
     }
 
+    async resetPassword(id: number, newPassword: string) {
+        const user = await this.findOrFail(id);
+
+        if (user.role === "owner") {
+            throw new AppError(403, "Los dueños no se pueden modificar desde la API");
+        }
+
+        await this.users.setPassword(id, await hashPassword(newPassword));
+    }
+
     private isInManagerScope(actor: AuthUser, user: User) {
         return (
             user.role === "employee" &&

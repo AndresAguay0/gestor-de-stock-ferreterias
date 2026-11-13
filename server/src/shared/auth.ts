@@ -27,13 +27,13 @@ export const createAuthenticate = (users: UserRepository): RequestHandler => asy
         throw new AppError(401, "Autenticación requerida");
     }
 
-    const userId = await verifyToken(match[1].trim());
-    if (userId === null) {
+    const token = await verifyToken(match[1].trim());
+    if (token === null) {
         throw new AppError(401, "Sesión inválida o vencida");
     }
 
-    const user = await users.findById(userId);
-    if (!user || !user.isActive) {
+    const user = await users.findById(token.userId);
+    if (!user || !user.isActive || user.tokenVersion !== token.tokenVersion) {
         throw new AppError(401, "Sesión inválida o vencida");
     }
 

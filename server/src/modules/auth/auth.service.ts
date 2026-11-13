@@ -2,7 +2,7 @@ import { AppError } from "../../shared/AppError.js";
 import { hashPassword, verifyPassword } from "../../shared/password.js";
 import { signToken } from "../../shared/token.js";
 import type { UserRepository } from "../users/user.repository.js";
-import type { LoginInput } from "./auth.schema.js";
+import type { ChangePasswordInput ,LoginInput } from "./auth.schema.js";
 
 const dummyHash = hashPassword("contraseña-de-relleno");
 
@@ -22,12 +22,29 @@ export class AuthService {
         }
 
         const user = await this.users.findById(account.id);
-        return { token: await signToken(account.id), user };
+        return { token: await signToken(account.id, account.tokenVersion), user };
     }
 
     async me(userId: number) {
         const user = await this.users.findById(userId);
         if (!user) throw new AppError(401, "Sesión inválida o vencida");
         return user;
+    }
+
+    async changePassword(userId: number, input: ChangePasswordInput) {
+        const account = await this.users.findByIdWithPassword(userId);
+        if (!account) throw new AppError(401, "Sesión inválida o vencida");
+
+        if (!(await verifyPassword(input.currentPassword, account.getDataValue("passwordHash")))) {
+            throw new AppError(400, "La contraseña actual es incorrecta");
+        }
+        if (input.newPassword === input.currentPassword) {
+            throw new AppError(400, "La nueva contraseña debe ser distinta de la actual");
+        }
+
+        const version = await this.users.setPassword(userId, await hashPassword(input.newPassword));
+        if (version === null) throw new AppError(401, "Sesión inválida o vencida");
+
+        return { token: await signToken(userId, version) };
     }
 }

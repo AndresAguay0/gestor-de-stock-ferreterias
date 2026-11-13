@@ -12,4 +12,8 @@ export class AuthController {
     me = async (req: Request, res: Response) => {
         res.json(await this.service.me(getAuthUser(req).id));
     };
+
+    changePassword = async (req: Request, res: Response) => {
+        res.json(await this.service.changePassword(getAuthUser(req).id, req.body));
+    };
 }

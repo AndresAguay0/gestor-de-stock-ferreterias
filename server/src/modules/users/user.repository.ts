@@ -1,4 +1,4 @@
-import { Op, type IncludeOptions, type Transaction } from "sequelize";
+import { Op, Transaction, type IncludeOptions } from "sequelize";
 import { HardwareStore } from "../../models/HardwareStore.js";
 import { User, type UserRole } from "../../models/User.js";
 import { UserStore } from "../../models/UserStore.js";
@@ -48,6 +48,17 @@ export class UserRepository {
 
     findByEmailWithPassword(email: string, tx?: Transaction) {
         return User.scope("withPassword").findOne({ where: { email }, transaction: tx });
+    }
+
+    findByIdWithPassword(id: number, tx?: Transaction) {
+        return User.scope("withPassword").findByPk(id, { transaction: tx });
+    }
+
+    async setPassword(id: number, passwordHash: string, tx?: Transaction) {
+        const user = await User.findByPk(id, { transaction: tx });
+        if (!user) return null;
+        await user.update({ passwordHash, tokenVersion: user.tokenVersion + 1}, { transaction: tx });
+        return user.tokenVersion;
     }
 
     async existsByEmail(email: string, excludeId?: number, tx?: Transaction) {

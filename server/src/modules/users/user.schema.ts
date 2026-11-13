@@ -28,6 +28,8 @@ export const updateUserSchema = z.object({
 
 export const reassignStoresSchema = z.object({ storeIds });
 
+export const resetPasswordSchema = z.object({ newPassword: password });
+
 export const listUsersQuerySchema = z.object({
     includeInactive: z
         .enum(["true", "false"])
