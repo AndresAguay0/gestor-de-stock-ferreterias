@@ -25,3 +25,5 @@ build/
 Thumbs.db
 .vscode/
 .idea/
+
+test-users.sh
