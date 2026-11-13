@@ -4,7 +4,6 @@ import { errorHandler, notFoundHandler } from "./shared/errorHandler.js";
 import { authController, authenticate, storeController, userController } from "./container.js";
 
 // Rutas
-import productRoutes from "./routes/product.routes.js";
 import { createAuthRouter } from "./modules/auth/auth.routes.js";
 import { createStoreRouter } from "./modules/stores/store.routes.js";
 import { createUserRouter } from "./modules/users/user.routes.js";
@@ -17,7 +16,6 @@ export const createApp = () => {
 
     // Uso de Rutas
     app.use("/api/auth", createAuthRouter(authController, authenticate));
-    app.use("/api/products", authenticate, productRoutes);
     app.use("/api/stores", createStoreRouter(storeController, authenticate));
     app.use("/api/users", createUserRouter(userController, authenticate));
 

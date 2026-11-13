@@ -8,6 +8,7 @@ import "./models/HardwareStore.js";
 import "./models/User.js";
 import "./models/UserStore.js";
 import "./models/Product.js";
+import "./models/Inventory.js"
 
 // Sincronización de base de datos y levante del server
 const startServer = async () => {
