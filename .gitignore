@@ -26,4 +26,4 @@ Thumbs.db
 .vscode/
 .idea/
 
-test-users.sh
+test-**.sh
