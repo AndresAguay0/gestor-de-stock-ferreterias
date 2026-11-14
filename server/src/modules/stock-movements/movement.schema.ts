@@ -6,9 +6,9 @@ const storeId = z.number().int().positive();
 
 const note = z.string().trim().max(255, "Máximo 255 caracteres").optional().transform((value) => value || undefined);
 
-const clienteRef = z.string().trim().min(1, "No puede estar vacía").max(64, "Máximo 64 caracteres").optional();
+const clientRef = z.string().trim().min(1, "No puede estar vacía").max(64, "Máximo 64 caracteres").optional();
 
-const base = { productId, storeId, note, clienteRef };
+const base = { productId, storeId, note, clientRef };
 
 const incomeSchema = z.object({
     ...base,
