@@ -35,7 +35,6 @@ export const createApp = () => {
         res.json({ message: "API de Sistema de Gestión de Stock Para Ferreterías funcionando" });
     });
 
-    // Siempre al final: primero la ruta inexistente, después el manejador de errores
     app.use(notFoundHandler);
     app.use(errorHandler);
 
