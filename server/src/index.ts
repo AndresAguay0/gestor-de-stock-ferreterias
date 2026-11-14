@@ -4,11 +4,7 @@ import { createApp } from "./app.js";
 import { migrator } from "./db/umzug.js";
 
 // Modelos
-import "./models/HardwareStore.js";
-import "./models/User.js";
-import "./models/UserStore.js";
-import "./models/Product.js";
-import "./models/Inventory.js"
+import "./models/index.js";
 
 // Sincronización de base de datos y levante del server
 const startServer = async () => {
