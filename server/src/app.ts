@@ -1,10 +1,11 @@
 import express from "express";
 import cors from "cors";
 import { errorHandler, notFoundHandler } from "./shared/errorHandler.js";
-import { authController, authenticate, storeController, userController } from "./container.js";
+import { authController, authenticate, productController, storeController, userController } from "./container.js";
 
 // Rutas
 import { createAuthRouter } from "./modules/auth/auth.routes.js";
+import { createProductRouter } from "./modules/products/product.routes.js";
 import { createStoreRouter } from "./modules/stores/store.routes.js";
 import { createUserRouter } from "./modules/users/user.routes.js";
 
@@ -16,15 +17,15 @@ export const createApp = () => {
 
     // Uso de Rutas
     app.use("/api/auth", createAuthRouter(authController, authenticate));
+    app.use("/api/products", createProductRouter(productController, authenticate));
     app.use("/api/stores", createStoreRouter(storeController, authenticate));
     app.use("/api/users", createUserRouter(userController, authenticate));
 
     // Ruta de prueba
     app.get("/", (_req, res) => {
-        res.json({ message: "API de Sistema de Gestión de Stock Para Ferreterías funcionando."});
+        res.json({ message: "API de Sistema de Gestión de Stock Para Ferreterías funcionando" });
     });
 
-    // Manejadores de errores
     app.use(notFoundHandler);
     app.use(errorHandler);
 
