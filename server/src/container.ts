@@ -1,6 +1,9 @@
 import { TransactionRunner } from "./db/transaction.js";
 import { AuthController } from "./modules/auth/auth.controller.js";
 import { AuthService } from "./modules/auth/auth.service.js";
+import { InventoryController } from "./modules/inventory/inventory.controller.js";
+import { InventoryRepository } from "./modules/inventory/inventory.repository.js";
+import { InventoryService } from "./modules/inventory/inventory.service.js";
 import { ProductController } from "./modules/products/product.controller.js";
 import { ProductRepository } from "./modules/products/product.repository.js";
 import { ProductService } from "./modules/products/product.service.js";
@@ -16,14 +19,17 @@ const transactionRunner = new TransactionRunner();
 const userRepository = new UserRepository();
 const storeRepository = new StoreRepository();
 const productRepository = new ProductRepository();
+const inventoryRepository = new InventoryRepository();
 
 const authService = new AuthService(userRepository);
 const storeService = new StoreService(storeRepository);
 const userService = new UserService(userRepository, storeRepository, transactionRunner);
 const productService = new ProductService(productRepository, transactionRunner);
+const inventoryService = new InventoryService(inventoryRepository, productRepository, storeRepository, transactionRunner);
 
 export const authenticate = createAuthenticate(userRepository);
 export const authController = new AuthController(authService);
 export const storeController = new StoreController(storeService);
 export const userController = new UserController(userService);
 export const productController = new ProductController(productService);
+export const inventoryController = new InventoryController(inventoryService);
