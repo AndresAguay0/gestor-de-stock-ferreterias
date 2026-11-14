@@ -40,7 +40,7 @@ export const updateProductSchema = z.object({
 
 const optionalText = (max: number) => z.string().trim().max(max, `Maximo ${max} caracteres`).optional().transform((value) => value || undefined);
 
-export const listProductQuerySchema = z.object({
+export const listProductsQuerySchema = z.object({
     search: optionalText(100),
     category: optionalText(100),
     barcode: optionalText(64),
@@ -51,4 +51,4 @@ export const listProductQuerySchema = z.object({
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
-export type ListProductsQuery = z.infer<typeof listProductQuerySchema>;
+export type ListProductsQuery = z.infer<typeof listProductsQuerySchema>;
