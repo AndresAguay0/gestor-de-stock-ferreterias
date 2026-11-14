@@ -62,3 +62,5 @@ export const getAuthUser = (req: Request): AuthUser => {
     }
     return req.user;
 };
+
+export const canAccessStore = (user: AuthUser, storeId: number): boolean => user.role === "owner" || user.storeIds.includes(storeId);
