@@ -44,3 +44,5 @@ export const toStored = (value: number, unit: UnitCode): number => {
 };
 
 export const fromStored = (stored: number): number => stored / SCALE;
+
+export const isBelowMinimum = (quantity: number, minQuantity: number): boolean => quantity < 0 || (minQuantity > 0 && quantity < minQuantity);

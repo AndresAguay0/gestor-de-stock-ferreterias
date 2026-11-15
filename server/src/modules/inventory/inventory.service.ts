@@ -4,7 +4,7 @@ import type { Inventory } from "../../models/Inventory.js";
 import type { Product } from "../../models/Product.js";
 import { AppError } from "../../shared/AppError.js";
 import { canAccessStore, type AuthUser } from "../../shared/auth.js";
-import { fromStored, toStored } from "../../shared/quantity.js";
+import { fromStored, isBelowMinimum, toStored } from "../../shared/quantity.js";
 import type { ProductRepository } from "../products/product.repository.js";
 import type { ListProductsQuery } from "../products/product.schema.js";
 import type { StoreRepository } from "../stores/store.repository.js";
@@ -89,7 +89,7 @@ export class InventoryService {
                     storeName: store.name,
                     quantity: fromStored(quantity),
                     minQuantity: fromStored(minQuantity),
-                    belowMinimum: minQuantity > 0 && quantity < minQuantity,
+                    belowMinimum: isBelowMinimum(quantity, minQuantity),
                 };
             }),
         };
