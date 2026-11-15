@@ -84,7 +84,7 @@ export class MovementService {
             throw new AppError(403, "No tenés permiso para realizar esta acción");
         }
         if (query.storeId !== undefined && !canAccessStore(actor, query.storeId)) {
-            throw new AppError(403, "No tenes acceso a ese local");
+            throw new AppError(403, "No tenés acceso a ese local");
         }
 
         const { items, total } = await this.movements.findAll({
