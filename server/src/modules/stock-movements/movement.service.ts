@@ -2,6 +2,7 @@ import type { TransactionRunner } from "../../db/transaction.js";
 import type { StockMovement } from "../../models/StockMovement.js";
 import { AppError } from "../../shared/AppError.js";
 import { canAccessStore, type AuthUser } from "../../shared/auth.js";
+import type { EventBus, StockChangedEvent } from "../../shared/events.js";
 import { fromStored, isBelowMinimum, toStored } from "../../shared/quantity.js";
 import type { InventoryRepository } from "../inventory/inventory.repository.js";
 import type { ProductRepository } from "../products/product.repository.js";
@@ -16,6 +17,7 @@ export class MovementService {
         private readonly products: ProductRepository,
         private readonly stores: StoreRepository,
         private readonly db: TransactionRunner,
+        private readonly events: EventBus,
     ) {}
 
     async register(actor: AuthUser, input: CreateMovementInput) {
@@ -26,7 +28,7 @@ export class MovementService {
             throw new AppError(403, "No tenés acceso a ese local");
         }
 
-        return this.db.runExclusive(async (tx) => {
+        const { result, event } = await this.db.runExclusive(async (tx) => {
             const product = await this.products.findById(input.productId, tx);
 
             if (!product || (!product.isActive && actor.role === "employee")) {
@@ -65,18 +67,36 @@ export class MovementService {
                 }, tx,
             );
 
+            const event: StockChangedEvent = {
+                productId: product.id,
+                storeId: store.id,
+                previousQuantity: change.previousQuantity,
+                quantity: change.quantity,
+                minQuantity: change.minQuantity,
+                movementId: movement.id,
+                userId: actor.id,
+            };
+
             return {
-                movement: this.view(movement), stock: {
-                    productId: product.id,
-                    storeId: store.id,
-                    storeName: store.name,
-                    quantity: fromStored(change.quantity),
-                    minQuantity: fromStored(change.minQuantity),
-                    belowMinimum: isBelowMinimum(change.quantity, change.minQuantity),
-                    negativeStock: change.quantity < 0,
+                event,
+                result: {
+                    movement: this.view(movement),
+                    stock: {
+                        productId: product.id,
+                        storeId: store.id,
+                        storeName: store.name,
+                        quantity: fromStored(change.quantity),
+                        minQuantity: fromStored(change.minQuantity),
+                        belowMinimum: isBelowMinimum(change.quantity, change.minQuantity),
+                        negativeStock: change.quantity < 0,
+                    },
                 },
             };
         });
+
+        this.events.emit("stock.changed", event);
+
+        return result;
     }
 
     async list(actor: AuthUser, query: ListMovementsQuery) {

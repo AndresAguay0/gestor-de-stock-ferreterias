@@ -16,6 +16,8 @@ import { MovementController } from "./modules/stock-movements/movement.controlle
 import { MovementRepository } from "./modules/stock-movements/movement.repository.js";
 import { MovementService } from "./modules/stock-movements/movement.service.js";
 
+import { EventBus } from "./shared/events.js";
+
 import { StoreController } from "./modules/stores/store.controller.js";
 import { StoreRepository } from "./modules/stores/store.repository.js";
 import { StoreService } from "./modules/stores/store.service.js";
@@ -25,6 +27,7 @@ import { UserRepository } from "./modules/users/user.repository.js";
 import { UserService } from "./modules/users/user.service.js";
 
 const transactionRunner = new TransactionRunner();
+export const eventBus = new EventBus();
 const userRepository = new UserRepository();
 const storeRepository = new StoreRepository();
 const productRepository = new ProductRepository();
@@ -36,7 +39,7 @@ const storeService = new StoreService(storeRepository);
 const userService = new UserService(userRepository, storeRepository, transactionRunner);
 const productService = new ProductService(productRepository, transactionRunner);
 const inventoryService = new InventoryService(inventoryRepository, productRepository, storeRepository, transactionRunner);
-const movementService = new MovementService(movementRepository, inventoryRepository, productRepository, storeRepository, transactionRunner);
+const movementService = new MovementService(movementRepository, inventoryRepository, productRepository, storeRepository, transactionRunner, eventBus);
 
 export const authenticate = createAuthenticate(userRepository);
 export const authController = new AuthController(authService);
