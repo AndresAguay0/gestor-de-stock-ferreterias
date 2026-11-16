@@ -1,20 +1,26 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize";
+import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, NonAttribute } from "sequelize";
 import sequelize from "../config/database.js";
 import { HardwareStore } from "./HardwareStore.js";
-import { UserHardwareStore } from "./UserHardwareStore.js";
+import { UserStore } from "./UserStore.js";
 
-export class User extends Model<
-InferAttributes<User>,
-InferCreationAttributes<User>> {
+export const USER_ROLES = ["owner", "manager", "employee"] as const;
+export type UserRole = (typeof USER_ROLES)[number];
+
+export class User extends Model<InferAttributes<User>,InferCreationAttributes<User>> {
     declare id: CreationOptional<number>;
     declare email: string;
     declare passwordHash: string;
-    declare role: CreationOptional<"dueño" | "gerente" | "empleado">;
-    declare hardwareStoreId?: CreationOptional<number | null>;
+    declare role: CreationOptional<UserRole>;
+    declare isActive: CreationOptional<boolean>;
 
-    // Metodos para asociaciones
-    declare setManagedStores: (stores: number[] | HardwareStore[]) => Promise<void>;
-    declare getManagedStores: () => Promise<HardwareStore[]>;
+    declare tokenVersion: CreationOptional<number>;
+
+    declare stores?: NonAttribute<HardwareStore[]>;
+
+    override toJSON(): object {
+        const { passwordHash, ...safe } = this.get({ plain: true });
+        return safe;
+    }
 }
 
 User.init(
@@ -34,33 +40,41 @@ User.init(
             allowNull: false,
         },
         role: {
-            type: DataTypes.ENUM("dueño", "gerente", "empleado"),
+            type: DataTypes.STRING,
             allowNull: false,
-            defaultValue: "empleado",
+            defaultValue: "employee",
+            validate: { isIn: [[...USER_ROLES]] },
         },
-        hardwareStoreId: {
+        isActive: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: true,
+        },
+        tokenVersion: {
             type: DataTypes.INTEGER,
-            allowNull: true,
-        }
+            allowNull: false,
+            defaultValue: 0,
+        },
     },
-    { 
+    {
         sequelize,
-        tableName: "users"
+        tableName: "users",
+        defaultScope: { attributes: { exclude: ["passwordHash"] } },
+        scopes: { withPassword: {} },
     }
 );
 
-// Relación. Una Ferretería tiene muchos Usuarios (Empleados)
-HardwareStore.hasMany(User, { foreignKey: "hardwareStoreId", as: "users" });
-User.belongsTo(HardwareStore, { foreignKey: "hardwareStoreId", as: "hardwareStore" });
-
-// Relación. Dueños y Gerentes pueden gestionar múltiples locales
+// Una persona puede estar asignada a varios locales (empleado: normalmente uno;
+// gerente: uno o varios; el dueño accede a todos sin necesitar filas)
 User.belongsToMany(HardwareStore, {
-    through: UserHardwareStore,
+    through: UserStore,
     foreignKey: "userId",
-    as: "managedStores",
+    otherKey: "hardwareStoreId",
+    as: "stores",
 });
 HardwareStore.belongsToMany(User, {
-    through: UserHardwareStore,
+    through: UserStore,
     foreignKey: "hardwareStoreId",
-    as: "managersAndOwners",
+    otherKey: "userId",
+    as: "users",
 });

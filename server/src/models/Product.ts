@@ -1,18 +1,20 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize";
+import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, NonAttribute } from "sequelize";
 import sequelize from "../config/database.js";
-import { HardwareStore } from "./HardwareStore.js"
+import { UNIT_CODES, type UnitCode } from "../shared/quantity.js";
+import type { Inventory } from "./Inventory.js";
 
-export class Product extends Model<
-InferAttributes<Product>,
-InferCreationAttributes<Product>> {
+export class Product extends Model<InferAttributes<Product>, InferCreationAttributes<Product>> {
     declare id: CreationOptional<number>;
     declare name: string;
-    declare description: CreationOptional<string>;
-    declare price: number;
-    declare stock: CreationOptional<number>;
-    declare minStock: CreationOptional<number>;
+    declare description: CreationOptional<string | null>;
     declare category: string;
-    declare hardwareStoreId: number;
+    declare unit: UnitCode;
+    declare priceCents: number;
+    declare sku: CreationOptional<string | null>;
+    declare barcode: CreationOptional<string | null>;
+    declare isActive: CreationOptional<boolean>;
+
+    declare inventories?: NonAttribute<Inventory[]>;
 }
 
 Product.init(
@@ -30,27 +32,32 @@ Product.init(
             type: DataTypes.TEXT,
             allowNull: true,
         },
-        price: {
-            type: DataTypes.FLOAT,
-            allowNull: false,
-        },
-        stock: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            defaultValue: 0,
-        },
-        minStock: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            defaultValue: 5,
-        },
         category: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        hardwareStoreId: {
+        unit: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: { isIn: [[...UNIT_CODES]] },
+        },
+        priceCents: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            validate: { min: 0 },
+        },
+        sku: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        barcode: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        isActive: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: true,
         },
     },
     {
@@ -58,7 +65,3 @@ Product.init(
         tableName: "products",
     }
 );
-
-// Relación. Una Ferretería tiene muchos Productos
-HardwareStore.hasMany(Product, { foreignKey: "hardwareStoreId", as: "products" });
-Product.belongsTo(HardwareStore, { foreignKey: "hardwareStoreId", as: "hardwareStore" });

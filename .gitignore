@@ -4,7 +4,7 @@ node_modules/
 # Archivos SQL
 *.sqlite
 *.sqlite3
-database.sqlite
+database.sqlite*
 
 # Compilaciones y builds
 dist/
@@ -25,3 +25,5 @@ build/
 Thumbs.db
 .vscode/
 .idea/
+
+test-**.sh

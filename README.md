@@ -16,10 +16,13 @@ Nuestro sistema de gestión de stock se encarga de mantener la coherencia y cons
 ### Tecnología elegida:
 #### Backend y API:
 - **Runtime:** *Node.js*
-- **Framework:** *Express*
+- **Framework:** *Express 5*
 - **Lenguaje:** *TypeScript*
-- **ORM:** *Sequelize*
+- **ORM:** *Sequelize 6*
 - **Base de Datos:** *SQLite*
+- **Validación:** *zod*
+- **Migraciones:** *umzug*
+- **Autenticación:** *JWT* (con *jose*) y contraseñas con *bcryptjs*
 
 #### Frontend:
 - **Librería UI:** *React*
@@ -51,12 +54,16 @@ npm install
 ---
 
 ### Cómo ejecutar el proyecto:
-#### Frontend (client/)
+#### Backend (server/)
+
+1. Crear el archivo `.env` a partir de `.env.example`.
+3. Correr el comando `npm run create-owner`. Aplica las migraciones y pide el email y la contraseña del primer dueño para crearlo.
+3. Para levantar el servidor en desarrollo, correr el siguiente comando:
 ```
 npm run dev
 ```
 
-#### Backend (server/)
+#### Frontend (client/)
 ```
 npm run dev
 ```
@@ -64,8 +71,17 @@ npm run dev
 ---
 
 ### Estado actual y pendientes conocidos:
-- Backend avanzado.
-- Falta agregar capaz de seguridad (bcrypt y jwt).
-- Falta Front End completo.
+>**Backend casi terminado con sistemas principales del proyecto funcionales**
+>
+> Falta:
+>- Sistema de reservas.
+>- Sistema de notificaciones.
+>- Mejoras para produccion:
+>    - Seguridad
+>    - Documentacion
+>    - Posible migracion a PostgreSQL
+> - Posible integracion de lector de codigos de barra.
+
+>**Falta Front End completo**
 
 ---
