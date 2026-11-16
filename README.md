@@ -72,12 +72,15 @@ npm run dev
 
 ### Estado actual y pendientes conocidos:
 >**Backend casi terminado con sistemas principales del proyecto funcionales**
+>
+> Falta:
 >- Sistema de reservas.
 >- Sistema de notificaciones.
 >- Mejoras para produccion:
 >    - Seguridad
 >    - Documentacion
 >    - Posible migracion a PostgreSQL
+> - Posible integracion de lector de codigos de barra.
 
 >**Falta Front End completo**
 
