@@ -16,6 +16,8 @@ import { ProductController } from "./modules/products/product.controller.js";
 import { ProductRepository } from "./modules/products/product.repository.js";
 import { ProductService } from "./modules/products/product.service.js";
 
+import { ReservationRepository } from "./modules/reservations/reservation.repository.js";
+
 import { MovementController } from "./modules/stock-movements/movement.controller.js";
 import { MovementRepository } from "./modules/stock-movements/movement.repository.js";
 import { MovementService } from "./modules/stock-movements/movement.service.js";
@@ -38,13 +40,14 @@ const productRepository = new ProductRepository();
 const inventoryRepository = new InventoryRepository();
 const movementRepository = new MovementRepository();
 const settingsRepository = new SettingsRepository();
+const reservationRepository = new ReservationRepository();
 
 const authService = new AuthService(userRepository);
 const storeService = new StoreService(storeRepository);
 const userService = new UserService(userRepository, storeRepository, transactionRunner);
 const productService = new ProductService(productRepository, transactionRunner);
 const inventoryService = new InventoryService(inventoryRepository, productRepository, storeRepository, transactionRunner);
-const movementService = new MovementService(movementRepository, inventoryRepository, productRepository, storeRepository, transactionRunner, eventBus);
+const movementService = new MovementService(movementRepository, inventoryRepository, productRepository, storeRepository, transactionRunner, eventBus, reservationRepository);
 const settingsService = new SettingsService(settingsRepository, transactionRunner);
 
 export const authenticate = createAuthenticate(userRepository);
