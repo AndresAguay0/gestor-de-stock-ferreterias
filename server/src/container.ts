@@ -4,6 +4,10 @@ import { AuthController } from "./modules/auth/auth.controller.js";
 import { AuthService } from "./modules/auth/auth.service.js";
 import { createAuthenticate } from "./shared/auth.js";
 
+import { SettingsController } from "./modules/settings/settings.controller.js";
+import { SettingsRepository } from "./modules/settings/settings.repository.js";
+import { SettingsService } from "./modules/settings/settings.service.js";
+
 import { InventoryController } from "./modules/inventory/inventory.controller.js";
 import { InventoryRepository } from "./modules/inventory/inventory.repository.js";
 import { InventoryService } from "./modules/inventory/inventory.service.js";
@@ -33,6 +37,7 @@ const storeRepository = new StoreRepository();
 const productRepository = new ProductRepository();
 const inventoryRepository = new InventoryRepository();
 const movementRepository = new MovementRepository();
+const settingsRepository = new SettingsRepository();
 
 const authService = new AuthService(userRepository);
 const storeService = new StoreService(storeRepository);
@@ -40,6 +45,7 @@ const userService = new UserService(userRepository, storeRepository, transaction
 const productService = new ProductService(productRepository, transactionRunner);
 const inventoryService = new InventoryService(inventoryRepository, productRepository, storeRepository, transactionRunner);
 const movementService = new MovementService(movementRepository, inventoryRepository, productRepository, storeRepository, transactionRunner, eventBus);
+const settingsService = new SettingsService(settingsRepository, transactionRunner);
 
 export const authenticate = createAuthenticate(userRepository);
 export const authController = new AuthController(authService);
@@ -48,3 +54,4 @@ export const userController = new UserController(userService);
 export const productController = new ProductController(productService);
 export const inventoryController = new InventoryController(inventoryService);
 export const movementController = new MovementController(movementService);
+export const settingsController = new SettingsController(settingsService);
