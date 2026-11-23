@@ -7,6 +7,7 @@ import { canAccessStore, type AuthUser } from "../../shared/auth.js";
 import { fromStored, isBelowMinimum, toStored } from "../../shared/quantity.js";
 import type { ProductRepository } from "../products/product.repository.js";
 import type { ListProductsQuery } from "../products/product.schema.js";
+import type { ReservationRepository, ReservedRow } from "../reservations/reservation.repository.js";
 import type { StoreRepository } from "../stores/store.repository.js";
 import type { InventoryRepository } from "./inventory.repository.js";
 
@@ -16,6 +17,8 @@ export class InventoryService {
         private readonly products: ProductRepository,
         private readonly stores: StoreRepository,
         private readonly db: TransactionRunner,
+        private readonly reservations: ReservationRepository,
+        private readonly now: () => Date = () => new Date(),
     ) {}
 
     async list(actor: AuthUser, query: ListProductsQuery) {
@@ -30,10 +33,12 @@ export class InventoryService {
             offset: query.offset,
         });
         const stores = await this.stores.findAll({ includeInactive: false });
-        const rows = await this.inventory.findByProductIds(products.map((product) => product.id));
+        const productIds = products.map((product) => product.id);
+        const rows = await this.inventory.findByProductIds(productIds);
+        const reservedRows = await this.reservations.sumReservedByProducts(productIds, this.now());
 
         return {
-            items: products.map((products) => this.buildStock(products, stores, rows)),
+            items: products.map((product) => this.buildStock(product, stores, rows, reservedRows)),
             total,
             limit: query.limit,
             offset: query.offset,
@@ -48,8 +53,9 @@ export class InventoryService {
 
         const stores = await this.stores.findAll({ includeInactive: false });
         const rows = await this.inventory.findByProductIds([product.id]);
+        const reservedRows = await this.reservations.sumReservedByProducts([product.id], this.now());
 
-        return this.buildStock(product, stores, rows);
+        return this.buildStock(product, stores, rows, reservedRows);
     }
 
     async setMinQuantity(actor: AuthUser, productId: number, storeId: number, minQuantity: number) {
@@ -72,9 +78,14 @@ export class InventoryService {
         return this.getByProduct(actor, productId);
     }
 
-    private buildStock(product: Product, stores: HardwareStore[], rows: Inventory[]) {
+    private buildStock(product: Product, stores: HardwareStore[], rows: Inventory[], reservedRows: ReservedRow[]) {
         const rowByStore = new Map(
             rows.filter((row) => row.productId === product.id).map((row => [row.hardwareStoreId, row])),
+        );
+        const reservedByStore = new Map(
+            reservedRows
+                .filter((row) => row.productId === product.id)
+                .map((row) => [row.hardwareStoreId, row.reserved] as const),
         );
 
         return {
@@ -83,6 +94,7 @@ export class InventoryService {
                 const row = rowByStore.get(store.id);
                 const quantity = row?.quantity ?? 0;
                 const minQuantity = row?.minQuantity ?? 0;
+                const reserved = reservedByStore.get(store.id) ?? 0;
 
                 return {
                     storeId: store.id,
@@ -90,6 +102,8 @@ export class InventoryService {
                     quantity: fromStored(quantity),
                     minQuantity: fromStored(minQuantity),
                     belowMinimum: isBelowMinimum(quantity, minQuantity),
+                    reserved: fromStored(reserved),
+                    available: fromStored(quantity - reserved),
                 };
             }),
         };
