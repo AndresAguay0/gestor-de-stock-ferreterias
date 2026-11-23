@@ -11,6 +11,10 @@ const envSchema = z.object({
     DB_PATH: z.string().min(1).default(defaultDbPath),
     JWT_SECRET: z.string().min(32, "Debe tener al menos 32 caracteres"),
     JWT_EXPIRES_IN: z.string().min(1).default("12h"),
+    TRUST_PROXY: z.coerce.number().int().min(0).default(0),
+    RATE_LIMIT_WINDOW_MINUTES: z.coerce.number().int().positive().default(15),
+    LOGIN_MAX_ATTEMPTS: z.coerce.number().int().positive().default(10),
+    CHANGE_PASSWORD_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
 });
 
 const result = envSchema.safeParse(process.env);

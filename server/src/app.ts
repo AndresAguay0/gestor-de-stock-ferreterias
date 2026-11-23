@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import { env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./shared/errorHandler.js";
 import {
     authController,
@@ -28,6 +29,8 @@ import { createSettingsRouter } from "./modules/settings/settings.routes.js";
 
 export const createApp = () => {
     const app = express();
+
+    if (env.TRUST_PROXY > 0) app.set("trust proxy", env.TRUST_PROXY);
 
     app.use(helmet());
     // PENDIENTE (antes de publicar): CORS abierto solo para desarrollo local. Cuando el cliente y la API
