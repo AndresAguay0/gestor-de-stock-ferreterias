@@ -6,10 +6,10 @@ import { AppError } from "../../shared/AppError.js";
 import { canAccessStore, type AuthUser } from "../../shared/auth.js";
 import { fromStored, isBelowMinimum, toStored } from "../../shared/quantity.js";
 import type { ProductRepository } from "../products/product.repository.js";
-import type { ListProductsQuery } from "../products/product.schema.js";
 import type { ReservationRepository, ReservedRow } from "../reservations/reservation.repository.js";
 import type { StoreRepository } from "../stores/store.repository.js";
 import type { InventoryRepository } from "./inventory.repository.js";
+import type { ListInventoryQuery } from "./inventory.schema.js";
 
 export class InventoryService {
     constructor(
@@ -21,18 +21,30 @@ export class InventoryService {
         private readonly now: () => Date = () => new Date(),
     ) {}
 
-    async list(actor: AuthUser, query: ListProductsQuery) {
+    async list(actor: AuthUser, query: ListInventoryQuery) {
         const includeInactive = query.includeInactive && actor.role !== "employee";
+        const stores = await this.stores.findAll({ includeInactive: false });
+
+        let belowMinimumIds: number[] | undefined;
+        if (query.belowMinimum) {
+            const scopeStoreIds = stores.filter((store) => canAccessStore(actor, store.id)).map((store) => store.id);
+            const candidates = await this.inventory.findBelowMinimumCandidates(scopeStoreIds);
+            belowMinimumIds = [
+                ...new Set(
+                    candidates.filter((row) => isBelowMinimum(row.quantity, row.minQuantity)).map((row) => row.productId),
+                ),
+            ];
+        }
 
         const { items: products, total } = await this.products.findAll({
             search: query.search,
             category: query.category,
             barcode: query.barcode,
+            ids: belowMinimumIds,
             includeInactive,
             limit: query.limit,
             offset: query.offset,
         });
-        const stores = await this.stores.findAll({ includeInactive: false });
         const productIds = products.map((product) => product.id);
         const rows = await this.inventory.findByProductIds(productIds);
         const reservedRows = await this.reservations.sumReservedByProducts(productIds, this.now());

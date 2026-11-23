@@ -6,6 +6,7 @@ export interface ProductFilters {
     search?: string;
     category?: string;
     barcode?: string;
+    ids?: number[];
     includeInactive: boolean;
     limit: number;
     offset: number;
@@ -23,11 +24,17 @@ export interface ProductChanges {
 
 export class ProductRepository {
     async findAll(filters: ProductFilters, tx?: Transaction) {
+
+        if (filters.ids && filters.ids.length === 0) {
+            return { items: [] as Product[], total: 0 };
+        }
+
         const conditions: WhereOptions[] = [];
 
         if (!filters.includeInactive) conditions.push({ isActive: true });
         if (filters.category) conditions.push({ category: filters.category });
         if (filters.barcode) conditions.push({ barcode: filters.barcode });
+        if (filters.ids) conditions.push({ id: filters.ids });
 
         if (filters.search) {
             for (const word of filters.search.split(/\s+/)) {

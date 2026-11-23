@@ -6,6 +6,7 @@ import {
     authenticate,
     inventoryController,
     movementController,
+    notificationController,
     productController,
     reservationController,
     storeController,
@@ -16,6 +17,7 @@ import {
 // Rutas
 import { createAuthRouter } from "./modules/auth/auth.routes.js";
 import { createInventoryRouter } from "./modules/inventory/inventory.routes.js";
+import { createNotificationRouter } from "./modules/notifications/notification.routes.js";
 import { createProductRouter } from "./modules/products/product.routes.js";
 import { createReservationRouter } from "./modules/reservations/reservation.routes.js";
 import { createMovementRouter } from "./modules/stock-movements/movement.routes.js";
@@ -33,6 +35,7 @@ export const createApp = () => {
     app.use("/api/auth", createAuthRouter(authController, authenticate));
     app.use("/api/inventory", createInventoryRouter(inventoryController, authenticate));
     app.use("/api/movements", createMovementRouter(movementController, authenticate));
+    app.use("/api/notifications", createNotificationRouter(notificationController, authenticate));
     app.use("/api/products", createProductRouter(productController, authenticate));
     app.use("/api/reservations", createReservationRouter(reservationController, authenticate));
     app.use("/api/settings", createSettingsRouter(settingsController, authenticate));
