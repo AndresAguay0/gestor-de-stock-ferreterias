@@ -7,6 +7,7 @@ import {
     inventoryController,
     movementController,
     productController,
+    reservationController,
     storeController,
     userController,
     settingsController,
@@ -16,6 +17,7 @@ import {
 import { createAuthRouter } from "./modules/auth/auth.routes.js";
 import { createInventoryRouter } from "./modules/inventory/inventory.routes.js";
 import { createProductRouter } from "./modules/products/product.routes.js";
+import { createReservationRouter } from "./modules/reservations/reservation.routes.js";
 import { createMovementRouter } from "./modules/stock-movements/movement.routes.js";
 import { createStoreRouter } from "./modules/stores/store.routes.js";
 import { createUserRouter } from "./modules/users/user.routes.js";
@@ -32,6 +34,7 @@ export const createApp = () => {
     app.use("/api/inventory", createInventoryRouter(inventoryController, authenticate));
     app.use("/api/movements", createMovementRouter(movementController, authenticate));
     app.use("/api/products", createProductRouter(productController, authenticate));
+    app.use("/api/reservations", createReservationRouter(reservationController, authenticate));
     app.use("/api/settings", createSettingsRouter(settingsController, authenticate));
     app.use("/api/stores", createStoreRouter(storeController, authenticate));
     app.use("/api/users", createUserRouter(userController, authenticate));

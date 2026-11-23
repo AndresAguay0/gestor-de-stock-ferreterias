@@ -7,6 +7,8 @@ import { User } from "./User.js";
 
 export const RESERVATION_STATUSES = ["active", "picked_up", "cancelled"] as const;
 export type ReservationStatus = (typeof RESERVATION_STATUSES)[number];
+export const RESERVATION_STATES = [...RESERVATION_STATUSES, "expired"] as const;
+export type ReservationState = (typeof RESERVATION_STATES)[number];
 
 export class Reservation extends Model<InferAttributes<Reservation>, InferCreationAttributes<Reservation>> {
     declare id: CreationOptional<number>;
