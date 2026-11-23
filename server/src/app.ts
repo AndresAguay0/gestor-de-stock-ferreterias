@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import { errorHandler, notFoundHandler } from "./shared/errorHandler.js";
 import {
     authController,
@@ -28,6 +29,10 @@ import { createSettingsRouter } from "./modules/settings/settings.routes.js";
 export const createApp = () => {
     const app = express();
 
+    app.use(helmet());
+    // PENDIENTE (antes de publicar): CORS abierto solo para desarrollo local. Cuando el cliente y la API
+    // estén en dominios distintos, restringirlo a los orígenes permitidos por variable de entorno
+    // Seguramente hagamos eso para la entrega final.
     app.use(cors());
     app.use(express.json());
 
