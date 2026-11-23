@@ -12,6 +12,11 @@ import { InventoryController } from "./modules/inventory/inventory.controller.js
 import { InventoryRepository } from "./modules/inventory/inventory.repository.js";
 import { InventoryService } from "./modules/inventory/inventory.service.js";
 
+import { NotificationController } from "./modules/notifications/notification.controller.js";
+import { registerNotificationListeners } from "./modules/notifications/notification.listener.js";
+import { NotificationRepository } from "./modules/notifications/notification.repository.js";
+import { NotificationService } from "./modules/notifications/notification.service.js";
+
 import { ProductController } from "./modules/products/product.controller.js";
 import { ProductRepository } from "./modules/products/product.repository.js";
 import { ProductService } from "./modules/products/product.service.js";
@@ -43,6 +48,7 @@ const inventoryRepository = new InventoryRepository();
 const movementRepository = new MovementRepository();
 const settingsRepository = new SettingsRepository();
 const reservationRepository = new ReservationRepository();
+const notificationRepository = new NotificationRepository();
 
 const authService = new AuthService(userRepository);
 const storeService = new StoreService(storeRepository);
@@ -52,6 +58,9 @@ const inventoryService = new InventoryService(inventoryRepository, productReposi
 const movementService = new MovementService(movementRepository, inventoryRepository, productRepository, storeRepository, transactionRunner, eventBus, reservationRepository);
 const reservationService = new ReservationService(reservationRepository, productRepository, storeRepository, inventoryRepository, settingsRepository, movementService, transactionRunner, eventBus);
 const settingsService = new SettingsService(settingsRepository, transactionRunner);
+const notificationService = new NotificationService(notificationRepository, userRepository, transactionRunner);
+
+registerNotificationListeners(eventBus, notificationService);
 
 export const authenticate = createAuthenticate(userRepository);
 export const authController = new AuthController(authService);
@@ -62,3 +71,4 @@ export const inventoryController = new InventoryController(inventoryService);
 export const movementController = new MovementController(movementService);
 export const reservationController = new ReservationController(reservationService);
 export const settingsController = new SettingsController(settingsService);
+export const notificationController = new NotificationController(notificationService);
