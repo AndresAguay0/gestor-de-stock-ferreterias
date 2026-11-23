@@ -50,6 +50,23 @@ export class UserRepository {
         });
     }
 
+    findActiveOwners(tx?: Transaction) {
+        return User.findAll({
+            where: { role: "owner", isActive: true },
+            order: [["email", "ASC"]],
+            transaction: tx,
+        });
+    }
+
+    findActiveManagersInStore(storeId: number, tx?: Transaction) {
+        return User.findAll({
+            where: { role: "manager", isActive: true },
+            include: [{ ...includeStores, where: { id: storeId }, required: true }],
+            order: [["email", "ASC"]],
+            transaction: tx,
+        });
+    }
+
     findByEmailWithPassword(email: string, tx?: Transaction) {
         return User.scope("withPassword").findOne({ where: { email }, transaction: tx });
     }
