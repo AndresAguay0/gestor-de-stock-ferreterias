@@ -7,6 +7,7 @@ const tooManyAttempts = (_req: Request, res: Response) => {
     res.status(429).json({ msg: "Demasiados intentos fallidos. Esperá unos minutos antes de volver a intentar" });
 };
 
+// Configuracion compartida por los limitadores
 const failedAttemptsOnly = {
     windowMs: env.RATE_LIMIT_WINDOW_MINUTES * 60_000,
     standardHeaders: true,
@@ -15,7 +16,7 @@ const failedAttemptsOnly = {
     handler: tooManyAttempts,
 } as const;
 
-// Login: por IP y email
+// Limita los intentos de login por IP y email
 export const loginLimiter = rateLimit({
     ...failedAttemptsOnly,
     limit: env.LOGIN_MAX_ATTEMPTS,
@@ -25,6 +26,7 @@ export const loginLimiter = rateLimit({
     },
 });
 
+// Limita los intentos de cambio de contraseña por el identificador del usuario autenticado
 export const changePasswordLimiter = rateLimit({
     ...failedAttemptsOnly,
     limit: env.CHANGE_PASSWORD_MAX_ATTEMPTS,
