@@ -8,12 +8,16 @@ import { migrator } from "./db/umzug.js";
 // Modelos
 import "./models/index.js";
 
+// Tiempo máximo de espera para apagar el servidor
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 
+// Registra los handlers de señales para apagar ordenadamente
 const registerShutdown = (server: Server) => {
     let shuttingDown = false;
 
     const shutdown = async (signal: string) => {
+        
+        // Esto evita empezar un segundo apagado si ya hay uno haciendose
         if (shuttingDown) {
             console.log("Segunda señal recibida: salida inmediata.");
             process.exit(1);
@@ -21,6 +25,7 @@ const registerShutdown = (server: Server) => {
         shuttingDown = true;
         console.log(`${signal} recibida: apagando el servidor...`);
 
+        // Fuerza la salida si el apagado tarda mas del tiempo maximo
         const timer = setTimeout(() => {
             console.error("El apagado ordenado tardó demasiado: salida forzada.");
             process.exit(1);
@@ -28,9 +33,12 @@ const registerShutdown = (server: Server) => {
         timer.unref();
 
         try {
+            // Deja de aceptar nuevas conecciones y espera a que se cierren las que ya estan
             await new Promise<void>((resolve, reject) => {
                 server.close((error) => (error ? reject(error) : resolve()));
             });
+
+            // Espera a que terminen las transacciones pendientes antes de cerrar la base
             await waitForPendingTransactions();
             await sequelize.close();
             console.log("Servidor detenido.");
@@ -45,7 +53,7 @@ const registerShutdown = (server: Server) => {
     process.on("SIGINT", () => void shutdown("SIGINT"));
 };
 
-// Sincronización de base de datos y levante del server
+// Inicializa la conexion a la base de datos, ejecuta las migraciones y levanta el servidor
 const startServer = async () => {
     try {
         await sequelize.authenticate();
