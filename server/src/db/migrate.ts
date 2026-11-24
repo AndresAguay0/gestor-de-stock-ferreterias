@@ -1,4 +1,3 @@
-import { error } from "console";
 import sequelize from "../config/database.js";
 import { migrator } from "./umzug.js";
 
@@ -20,12 +19,14 @@ const run = async () => {
             break;
         }
         default:
-            console.error("Uso: tsx src/db/migrate.ts <up|down|status>");
+            console.error("Uso: migrate <up|down|status>");
             process.exitCode = 1;
     }
 };
 
-run().catch((error) => {
-    console.error("Error en las migraciones:", error);
-    process.exitCode = 1;
-}).finally(() => sequelize.close());
+run()
+    .catch((error: unknown) => {
+        console.error("Error en las migraciones:", error);
+        process.exitCode = 1;
+    })
+    .finally(() => sequelize.close());
