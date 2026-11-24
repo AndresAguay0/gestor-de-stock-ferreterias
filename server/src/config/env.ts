@@ -2,10 +2,12 @@ import { config } from "dotenv";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 
+// Carga las variables de entorno de .env sin mostrar info en la terminal
 config({ quiet: true });
 
 const defaultDbPath = fileURLToPath(new URL("../../database.sqlite", import.meta.url));
 
+// Schema de variables de entorno
 const envSchema = z.object({
     PORT: z.coerce.number().int().positive().default(4000),
     DB_PATH: z.string().min(1).default(defaultDbPath),
@@ -18,6 +20,7 @@ const envSchema = z.object({
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 });
 
+// Valida las variables de entorno y las setea
 const result = envSchema.safeParse(process.env);
 
 if (!result.success) {
