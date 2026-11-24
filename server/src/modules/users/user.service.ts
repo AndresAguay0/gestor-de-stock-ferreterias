@@ -40,6 +40,8 @@ export class UserService {
             await this.assertStoresAssignable(input.storeIds, tx);
 
             const user = await this.users.create({ email: input.email, passwordHash, role: input.role }, tx);
+
+            // Reemplaza las asignaciones de sucursales del usuario recien creado
             await this.users.replaceStores(user.id, input.storeIds, tx);
 
             return this.findOrFail(user.id, tx);
@@ -54,6 +56,7 @@ export class UserService {
                 throw new AppError(403, "Los dueños no se pueden modificar desde la API");
             }
 
+            // Calcula como quedarian el rol y las sucursales despues de aplicar los cambios
             const finalRole = input.role ?? user.role;
             const currentStoreIds = (user.stores ?? []).map((store) => store.id);
             const finalStoreIds = input.storeIds ?? currentStoreIds;
@@ -84,6 +87,7 @@ export class UserService {
         });
     }
 
+    // Reasigna las sucursales de un usuario respetando los permisos
     reassignStores(actor: AuthUser, targetId: number, storeIds: number[]) {
         if (actor.role === "owner") {
             return this.update(targetId, { storeIds });
