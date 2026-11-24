@@ -17,12 +17,14 @@ export class NotificationService {
         private readonly now: () => Date = () => new Date(),
     ) {}
 
+    // Se ejecuta cuando cambia el stock de un producto en un local
     async handleStockChanged(event: StockChangedEvent) {
         const crossedDown =
             !isBelowMinimum(event.previousQuantity, event.minQuantity) &&
             isBelowMinimum(event.quantity, event.minQuantity);
         if (!crossedDown) return 0;
 
+        // La busqueda de destintatarios y la creacion de notificaciones se hacen en una misma transaccion
         return this.db.run(async (tx) => {
             const owners = await this.users.findActiveOwners(tx);
             const managers = await this.users.findActiveManagersInStore(event.storeId, tx);
@@ -82,6 +84,7 @@ export class NotificationService {
         return { updated };
     }
 
+    // Busca una notificación del usuario autenticado
     private async loadOwned(actor: AuthUser, id: number, tx: Transaction) {
         const notification = await this.notifications.findOwned(id, actor.id, tx);
         if (!notification) throw new AppError(404, "Notificación no encontrada");
