@@ -52,6 +52,7 @@ export class ReservationService {
 
             const quantity = toStored(input.quantity, product.unit);
 
+            // Calculo del stock disponible descontando las cantidades ya reservadas
             const rows = await this.inventory.findByProductIds([product.id], tx);
             const stock = rows.find((row) => row.hardwareStoreId === store.id)?.quantity ?? 0;
             const reserved = await this.reservations.sumReserved(product.id, store.id, now, tx);
@@ -112,6 +113,7 @@ export class ReservationService {
         return this.view(await this.loadVisible(actor, id), now);
     }
 
+    // Confirma el retiro de una reserva y descuenta el stock
     async pickup(actor: AuthUser, id: number) {
         const now = this.now();
 
@@ -126,6 +128,7 @@ export class ReservationService {
                 throw new AppError(409, "La reserva venció");
             }
 
+            // Marca la reserva como retirada
             await this.reservations.resolve(current.id, "picked_up", actor.id, now, tx);
 
             const applied = await this.movements.applyMovement(
@@ -141,6 +144,7 @@ export class ReservationService {
                 tx,
             );
 
+            // Vincula el movimiento con la reserva
             await this.reservations.setMovementId(current.id, applied.result.movement.id, tx);
 
             return {
@@ -164,6 +168,8 @@ export class ReservationService {
             if (current.createdByUserId !== actor.id && !canAccessStore(actor, current.hardwareStoreId)) {
                 throw new AppError(403, "No tenés permiso para cancelar esta reserva");
             }
+
+            // Evita cancelar una reserva ya cancelada o retirada
             this.assertActive(current);
 
             await this.reservations.resolve(current.id, "cancelled", actor.id, now, tx);
