@@ -15,6 +15,7 @@ const envSchema = z.object({
     RATE_LIMIT_WINDOW_MINUTES: z.coerce.number().int().positive().default(15),
     LOGIN_MAX_ATTEMPTS: z.coerce.number().int().positive().default(10),
     CHANGE_PASSWORD_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
+    NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 });
 
 const result = envSchema.safeParse(process.env);
