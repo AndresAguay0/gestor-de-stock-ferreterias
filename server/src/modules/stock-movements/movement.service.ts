@@ -25,6 +25,8 @@ export class MovementService {
     ) {}
 
     async register(actor: AuthUser, input: CreateMovementInput) {
+
+        // Ejecuta la actualizacion del inventario y el registro del movimiento en una transaccion exclusiva
         const { result, event } = await this.db.runExclusive((tx) => this.applyMovement(actor, input, tx));
 
         this.events.emit("stock.changed", event);
@@ -60,6 +62,7 @@ export class MovementService {
             product.unit,
         );
 
+        // Los ajustes establecen una cantidad final
         const change = input.type === "adjustment"
             ? await this.inventory.setQuantity(product.id, store.id, amount, tx)
             : await this.inventory.applyDelta(product.id, store.id, input.type === "in" ? amount : -amount, tx);
@@ -91,6 +94,7 @@ export class MovementService {
         const reservedStockAffected =
             input.type === "out" && (await this.affectsReservedStock(product.id, store.id, change.quantity, tx));
 
+        // Devuelve los datos del movimiento y un resumen del estado actual del stock
         return {
             event,
             result: {
@@ -137,11 +141,13 @@ export class MovementService {
         };
     }
 
+    // Determina si el stock disponible queda por debajo de lo reservado para ese producto y sucursal
     private async affectsReservedStock(productId: number, storeId: number, quantity: number, tx: Transaction) {
         const reserved = await this.reservations.sumReserved(productId, storeId, this.now(), tx);
         return reserved > 0 && quantity - reserved < 0;
     }
 
+    // Convierte un movimiento del modelo de base de datos al formato que devuelve la API
     private view(movement: StockMovement) {
         return {
             id: movement.id,
