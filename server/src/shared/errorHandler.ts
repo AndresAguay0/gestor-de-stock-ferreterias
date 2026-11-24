@@ -1,6 +1,7 @@
 import type { ErrorRequestHandler, RequestHandler } from "express";
 import { ForeignKeyConstraintError, UniqueConstraintError } from "sequelize";
 import { AppError } from "./AppError.js";
+import { logger } from "./logger.js";
 
 export const notFoundHandler: RequestHandler = (_req, res) => {
     res.status(404).json({ msg: "Ruta no encontrada" });
@@ -10,7 +11,7 @@ const isInvalidJsonError = (err: unknown): boolean =>
     typeof err === "object" && err !== null && "type" in err && err.type === "entity.parse.failed";
 
 
-export const errorHandler: ErrorRequestHandler = (err: unknown, _req, res, next) => {
+export const errorHandler: ErrorRequestHandler = (err: unknown, req, res, next) => {
     if (res.headersSent) {
         next(err);
         return;
@@ -36,6 +37,6 @@ export const errorHandler: ErrorRequestHandler = (err: unknown, _req, res, next)
         return;
     }
 
-    console.error("Error no controlado:", err);
+    logger.error("Error no controlado", { method: req.method, path: req.originalUrl.split("?")[0], err });
     res.status(500).json({ msg: "Error interno del servidor" });
 };

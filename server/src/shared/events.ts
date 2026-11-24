@@ -1,4 +1,5 @@
 import { EventEmitter } from "node:events";
+import { logger } from "./logger.js";
 
 export interface StockChangedEvent {
     productId: number;
@@ -24,10 +25,10 @@ export class EventBus {
             try {
                 const result = listener(...args);
                 if (result instanceof Promise) {
-                    result.catch((error: unknown) => console.error(`Error en un listener de ${name}:`, error));
+                    result.catch((error: unknown) => logger.error(`Error en un listener de ${name}`, { err: error }));
                 }
             } catch (error) {
-                console.error(`Error en un listener de ${name}:`, error);
+                logger.error(`Error en un listener de ${name}`, { err: error });
             }
         });
     }

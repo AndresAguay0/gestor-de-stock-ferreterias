@@ -21,3 +21,5 @@ export class TransactionRunner {
         return enqueue(() => sequelize.transaction({ type: Transaction.TYPES.IMMEDIATE }, work));
     }
 }
+
+export const waitForPendingTransactions = () => queue.then(() => undefined);
