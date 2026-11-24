@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import { type ZodType, type z } from "zod";
 import { AppError } from "./AppError.js";
 
-// Valida "data" contra el esquema y devuelve el resultado ya tipado.
+// Valida "data" contra el esquema y devuelve el resultado ya tipado
 export const parseOrThrow = <S extends ZodType>(schema: S, data: unknown): z.infer<S> => {
     const result = schema.safeParse(data);
 

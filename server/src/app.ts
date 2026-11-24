@@ -32,6 +32,7 @@ import { createSettingsRouter } from "./modules/settings/settings.routes.js";
 export const createApp = () => {
     const app = express();
 
+    // Esto es por si mas adelante lo queremos usar, pero configura la cantidad de proxies de confianza si lo seteamos en el .env
     if (env.TRUST_PROXY > 0) app.set("trust proxy", env.TRUST_PROXY);
 
     app.use(requestLogger);
@@ -46,7 +47,7 @@ export const createApp = () => {
     app.use(cors());
     app.use(express.json());
 
-    // Uso de Rutas
+    // Registro de rutas de los modulos de la API
     app.use("/api/auth", createAuthRouter(authController, authenticate));
     app.use("/api/inventory", createInventoryRouter(inventoryController, authenticate));
     app.use("/api/movements", createMovementRouter(movementController, authenticate));
@@ -62,6 +63,7 @@ export const createApp = () => {
         res.json({ message: "API de Sistema de Gestión de Stock Para Ferreterías funcionando" });
     });
 
+    // Registro de middlewares handlers de rutas que no existen y errores
     app.use(notFoundHandler);
     app.use(errorHandler);
 

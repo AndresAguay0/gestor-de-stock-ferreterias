@@ -4,6 +4,7 @@ import type { UserRepository } from "../modules/users/user.repository.js";
 import { AppError } from "./AppError.js";
 import { verifyToken } from "./token.js";
 
+// Datos del usuario autenticado que quedan disponibles durante la peticion
 export interface AuthUser {
     id: number;
     email: string;
@@ -11,6 +12,7 @@ export interface AuthUser {
     storeIds: number[];
 }
 
+// Extiende el tipo Request para incluir los datos del usuario autenticado
 declare global {
     namespace Express {
         interface Request {
@@ -19,9 +21,13 @@ declare global {
     }
 }
 
+// Asigna un nivel numerico a cada rol
 const ROLE_LEVEL: Record<UserRole, number> = { employee: 1, manager: 2, owner: 3};
 
+// Valida el token y carga los datos
 export const createAuthenticate = (users: UserRepository): RequestHandler => async (req, _res, next) => {
+
+    // Busca el token en el header
     const match = req.headers.authorization?.match(/^Bearer\s+(.+)$/i);
     if (!match?.[1]) {
         throw new AppError(401, "Autenticación requerida");
@@ -32,11 +38,13 @@ export const createAuthenticate = (users: UserRepository): RequestHandler => asy
         throw new AppError(401, "Sesión inválida o vencida");
     }
 
+    // Obtiene al usuario, se fija que siga activo y que la version del token sea valida
     const user = await users.findById(token.userId);
     if (!user || !user.isActive || user.tokenVersion !== token.tokenVersion) {
         throw new AppError(401, "Sesión inválida o vencida");
     }
 
+    // Guarda en la peticion los datos necesarios del usuario
     req.user = {
         id: user.id,
         email: user.email,

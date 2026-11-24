@@ -8,9 +8,14 @@ export const migrator = new Umzug({
     migrations: {
         // en dev son .ts y compilado son .js
         glob: ["*.{ts,js}", { cwd: migrationsDir }],
+
+        // Define como se cargan las migraciones y como se ejecutan up y down
         resolve: ({ name, path }) => {
             if (!path) throw new Error(`No se encontró el archivo de la migración ${name}`);
+
+            // Convierte la ruta del archivo a una URL valida para la importacion dinamica
             const load = () => import(pathToFileURL(path).href);
+            
             return {
                 name,
                 up: async (params) => (await load()).up(params),

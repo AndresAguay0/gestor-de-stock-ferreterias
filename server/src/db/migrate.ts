@@ -1,6 +1,7 @@
 import sequelize from "../config/database.js";
 import { migrator } from "./umzug.js";
 
+// Guarda el comando que recibe como argumento al ejecutar el script
 const command = process.argv[2];
 
 const run = async () => {

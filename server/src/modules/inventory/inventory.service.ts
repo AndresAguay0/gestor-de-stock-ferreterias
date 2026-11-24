@@ -90,10 +90,15 @@ export class InventoryService {
         return this.getByProduct(actor, productId);
     }
 
+    // Construye la información de stock de un producto para todos los locales recibidos
     private buildStock(product: Product, stores: HardwareStore[], rows: Inventory[], reservedRows: ReservedRow[]) {
+
+        // Indexa las cantidades fisicas por id de local
         const rowByStore = new Map(
             rows.filter((row) => row.productId === product.id).map((row => [row.hardwareStoreId, row])),
         );
+
+        // Indexa las cantidades reservadas por id de local
         const reservedByStore = new Map(
             reservedRows
                 .filter((row) => row.productId === product.id)
@@ -103,6 +108,8 @@ export class InventoryService {
         return {
             product,
             stores: stores.map((store) => {
+
+                // Si todavia no existe un registro de inventario para ese local se considera minimo y stock 0
                 const row = rowByStore.get(store.id);
                 const quantity = row?.quantity ?? 0;
                 const minQuantity = row?.minQuantity ?? 0;
