@@ -10,17 +10,24 @@ const prompt = createPrompt();
 const run = async () => {
     await migrator.up();
 
-    const email = emailSchema.safeParse(await prompt.ask("Email del dueño: "));
+    const emailFromEnv = process.env.OWNER_EMAIL;
+    const passwordFromEnv = process.env.OWNER_PASSWORD;
+
+    const email = emailSchema.safeParse(emailFromEnv ?? (await prompt.ask("Email del dueño: ")));
     if (!email.success) throw new Error(email.error.issues[0]?.message ?? "Email inválido");
 
     const users = new UserRepository();
     if (await users.existsByEmail(email.data)) throw new Error("Ya existe un usuario con ese email");
 
-    const password = passwordSchema.safeParse(await prompt.askHidden("Contraseña (mínimo 8 caracteres): "));
+    const password = passwordSchema.safeParse(
+        passwordFromEnv ?? (await prompt.askHidden("Contraseña (mínimo 8 caracteres): ")),
+    );
     if (!password.success) throw new Error(password.error.issues[0]?.message ?? "Contraseña inválida");
 
-    const repeated = await prompt.askHidden("Repetí la contraseña: ");
-    if (repeated !== password.data) throw new Error("Las contraseñas no coinciden");
+    if (passwordFromEnv === undefined) {
+        const repeated = await prompt.askHidden("Repetí la contraseña: ");
+        if (repeated !== password.data) throw new Error("Las contraseñas no coinciden");
+    }
 
     const owner = await users.create({
         email: email.data,

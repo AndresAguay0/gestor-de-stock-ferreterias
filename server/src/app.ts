@@ -4,6 +4,7 @@ import helmet from "helmet";
 import { env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./shared/errorHandler.js";
 import { requestLogger } from "./shared/requestLogger.js";
+import { logger } from "./shared/logger.js";
 import {
     authController,
     authenticate,
@@ -35,9 +36,13 @@ export const createApp = () => {
 
     app.use(requestLogger);
     app.use(helmet());
+    
     // PENDIENTE (antes de publicar): CORS abierto solo para desarrollo local. Cuando el cliente y la API
     // estén en dominios distintos, restringirlo a los orígenes permitidos por variable de entorno
     // Seguramente hagamos eso para la entrega final.
+    if (env.NODE_ENV === "production") {
+        logger.warn("CORS está abierto a cualquier origen: restringirlo antes de publicar (ver app.ts)");
+    }
     app.use(cors());
     app.use(express.json());
 
