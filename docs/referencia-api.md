@@ -72,7 +72,7 @@ Es un catálogo global: el mismo producto para todos los locales.
 | `POST /api/products` | Gerente+ | { name, description?, category, unit, priceCents, sku?, barcode? } | 201. El SKU se guarda en mayúsculas. 409 si el SKU o el código de barras ya existen |
 | `PATCH /api/products/:id` | Gerente+ | { name?, description?, category?, priceCents?, sku?, barcode?, isActive? }, al menos un campo | El producto actualizado. Mandar null en `description`, `sku` o `barcode` los borra. La unidad no se puede cambiar (400) |
 
-Límites: `name` hasta 150 caracteres, `description` hasta 2000, `category` hasta 100, `sku` y `barcode` hasta 64, y `priceCents` entero entre 0 y 2.000.000.000.
+Límites: `name` hasta 150 caracteres, `description` hasta 200, `category` hasta 100, `sku` y `barcode` hasta 64, y `priceCents` entero entre 0 y 2.000.000.000.
 
 Un producto es { id, name, description, category, unit, priceCents, sku, barcode, isActive, createdAt, updatedAt }.
 
@@ -205,11 +205,11 @@ Una única configuración para toda la instalación.
 
 | Ruta | Quién | Pedido | Respuesta y reglas |
 | --- | --- | --- | --- |
-| `GET /api/settings` | Sesión | — | La configuración actual |
-| `PATCH /api/settings` | Dueño | { businessName?, reservationDefaultMinutes? }, al menos un campo | La configuración actualizada |
+| `GET /api/settings` | Sesión | — | { businessName, reservationDefaultMinutes } |
+| `PATCH /api/settings` | Dueño | { businessName?, reservationDefaultMinutes? }, al menos un campo | La configuración actualizada, con la misma forma que el `GET`. Cualquier otro usuario recibe 403 |
 
-- `businessName` es el nombre del negocio: hasta 100 caracteres. Mandar `null` o un texto vacío lo borra.
-- `reservationDefaultMinutes` es la duración por defecto de las reservas, en minutos: entero de 1 a 4320 (72 horas). Vale 120 hasta que se cambie.
+- `businessName` es el nombre del negocio: hasta 100 caracteres, o `null` si no se cargó ninguno. Mandar `null` o un texto vacío lo borra.
+- `reservationDefaultMinutes` es la duración por defecto de las reservas, en minutos: un entero de 1 a 4320 (72 horas). Vale 120 hasta que se cambie.
 
 ## 12. Unidades
 
