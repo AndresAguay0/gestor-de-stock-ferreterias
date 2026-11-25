@@ -11,7 +11,7 @@ API REST del sistema. Permite que una ferretería con varios locales de un mismo
 - **Roles** (empleado, gerente y dueño) con permisos por local.
 - **Configuración** del negocio.
 
-**Estado actual:** las funciones principales del backend están completas. Todavía no hay pruebas automáticas. El detalle de las limitaciones está en la [documentación técnica](../docs/desarrollo.md#6-limitaciones-conocidas).
+**Estado actual:** las funciones principales del backend están completas. Todavía no hay pruebas automáticas. El detalle de las limitaciones está en la [documentación técnica](../docs/documentacion-backend.md#6-limitaciones-conocidas).
 
 ## Tecnología
 
@@ -40,7 +40,7 @@ Copiar `.env.example` como `.env` (`cp .env.example .env`). Hay que completar `J
 node -p "crypto.randomBytes(48).toString('hex')"
 ```
 
-Se pega el resultado en el `.env` (`JWT_SECRET=...`). El resto de las variables son opcionales: están descritas en la [documentación técnica](../docs/desarrollo.md#2-configuración-variables-de-entorno).
+Se pega el resultado en el `.env` (`JWT_SECRET=...`). El resto de las variables son opcionales: están descritas en la [documentación técnica](../docs/documentacion-backend.md#2-configuración-variables-de-entorno).
 
 **3. Crear el primer dueño**
 
@@ -71,7 +71,7 @@ El resto de las rutas están en la [referencia de la API](../docs/referencia-api
 | `npm run create-owner` | Crear el primer dueño |
 | `npm run reset-owner-password` | Recuperar la contraseña de un dueño |
 
-La lista completa (con las variantes para la versión compilada) está en la [documentación técnica](../docs/desarrollo.md#1-comandos-útiles).
+La lista completa (con las variantes para la versión compilada) está en la [documentación técnica](../docs/documentacion-backend.md#1-comandos-útiles).
 
 ## Versión compilada
 
@@ -114,7 +114,7 @@ Los módulos son `auth`, `users`, `stores`, `products`, `inventory`, `stock-move
 
 ## Más información
 
-- [Documentación técnica](../docs/desarrollo.md): comandos, configuración, estructura, reglas de negocio, diagramas y limitaciones.
+- [Documentación técnica](../docs/documentacion-backend.md): comandos, configuración, estructura, reglas de negocio, diagramas y limitaciones.
 - [Referencia de la API](../docs/referencia-api.md): cada endpoint con su pedido, su respuesta y sus errores.
 - [Decisiones de diseño](../docs/desiciones-diseno.md): qué se decidió, qué alternativas había y qué costos se asumieron.
 - [README del proyecto](../README.md): visión general del sistema y del repositorio.
