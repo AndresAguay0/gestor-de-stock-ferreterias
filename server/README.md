@@ -116,5 +116,5 @@ Los módulos son `auth`, `users`, `stores`, `products`, `inventory`, `stock-move
 
 - [Documentación técnica](../docs/documentacion-backend.md): comandos, configuración, estructura, reglas de negocio, diagramas y limitaciones.
 - [Referencia de la API](../docs/referencia-api.md): cada endpoint con su pedido, su respuesta y sus errores.
-- [Decisiones de diseño](../docs/desiciones-diseno.md): qué se decidió, qué alternativas había y qué costos se asumieron.
+- [Decisiones de diseño](../docs/decisiones-diseno.md): qué se decidió, qué alternativas había y qué costos se asumieron.
 - [README del proyecto](../README.md): visión general del sistema y del repositorio.
