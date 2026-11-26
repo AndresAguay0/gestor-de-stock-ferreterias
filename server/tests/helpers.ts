@@ -55,8 +55,8 @@ export const makeStore = async (ownerToken: string, name: string) => {
     return must(res, 201, `Crear el local ${name}`).body.id as number;
 };
 
-// Crea el usuario y devuelve su token de sesión
-export const makeUser = async (
+// Crea el usuario y devuelve su id, su email y su token de sesión
+export const makeUserWithId = async (
     ownerToken: string,
     email: string,
     role: "manager" | "employee",
@@ -67,8 +67,11 @@ export const makeUser = async (
         .set(withToken(ownerToken))
         .send({ email, password: USER_PASSWORD, role, storeIds });
     must(res, 201, `Crear a ${email}`);
-    return login(email, USER_PASSWORD);
+    return { id: res.body.id as number, email, token: await login(email, USER_PASSWORD) };
 };
+
+// Lo mismo, pero devuelve solo el token
+export const makeUser = async (...args: Parameters<typeof makeUserWithId>) => (await makeUserWithId(...args)).token;
 
 export const makeProduct = async (ownerToken: string, name: string, unit: string) => {
     const res = await http()
