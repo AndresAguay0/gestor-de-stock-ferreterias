@@ -18,7 +18,7 @@ export class User extends Model<InferAttributes<User>,InferCreationAttributes<Us
     declare stores?: NonAttribute<HardwareStore[]>;
 
     override toJSON(): object {
-        const { passwordHash, ...safe } = this.get({ plain: true });
+        const { passwordHash, tokenVersion, ...safe } = this.get({ plain: true });
         return safe;
     }
 }
