@@ -109,6 +109,8 @@ describe("Autenticación", () => {
             expect(res.status).toBe(200);
             expect(JSON.stringify(res.body)).toContain(employee.email);
             expect(JSON.stringify(res.body)).not.toContain("passwordHash");
+            expect(JSON.stringify(res.body)).not.toContain("passwordHash");
+            expect(JSON.stringify(res.body)).not.toContain("tokenVersion");
         });
 
         it("desactivar a un usuario cierra su sesión de inmediato (el usuario se consulta en cada pedido)", async () => {
