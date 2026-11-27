@@ -31,16 +31,12 @@ function AppContent() {
   }, [])
 
   useEffect(() => {
-    if (isLoading) return
-
     if (!user && currentPath !== '/login') {
       window.history.replaceState({}, '', '/login')
-      setCurrentPath('/login')
     }
 
     if (user && currentPath === '/login') {
       window.history.replaceState({}, '', '/')
-      setCurrentPath('/')
     }
   }, [user, isLoading, currentPath])
 

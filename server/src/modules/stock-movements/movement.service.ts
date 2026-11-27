@@ -67,6 +67,19 @@ export class MovementService {
             ? await this.inventory.setQuantity(product.id, store.id, amount, tx)
             : await this.inventory.applyDelta(product.id, store.id, input.type === "in" ? amount : -amount, tx);
 
+        // La operación está dentro de una transacción: al lanzar el error se revierte
+        // cualquier cambio de inventario realizado arriba.
+        if (change.quantity < 0) {
+            throw new AppError(400, "El stock no puede quedar negativo");
+        }
+
+        if (input.type === "out") {
+            const reserved = await this.reservations.sumReserved(product.id, store.id, this.now(), tx);
+            if (change.quantity < reserved) {
+                throw new AppError(400, `Stock disponible insuficiente. Hay ${Math.max(0, change.previousQuantity - reserved)} unidades disponibles`);
+            }
+        }
+
         const movement = await this.movements.create(
             {
                 productId: product.id,
@@ -132,8 +145,8 @@ export class MovementService {
                 product: movement.product
                     ? { id: movement.product.id, name: movement.product.name, unit: movement.product.unit }
                     : null,
-                store: movement.store ? { id: movement.store.id, name: movement.store.name} : null,
-                user: movement.user ? { id: movement.user.id, email: movement.user.email } : null, 
+                store: movement.store ? { id: movement.store.id, name: movement.store.name } : null,
+                user: movement.user ? { id: movement.user.id, email: movement.user.email } : null,
             })),
             total,
             limit: query.limit,
