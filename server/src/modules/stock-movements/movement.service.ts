@@ -69,13 +69,11 @@ export class MovementService {
 
         // La operación está dentro de una transacción: al lanzar el error se revierte
         // cualquier cambio de inventario realizado arriba.
-        if (change.quantity < 0) {
-            throw new AppError(400, "El stock no puede quedar negativo");
-        }
+
 
         if (input.type === "out") {
             const reserved = await this.reservations.sumReserved(product.id, store.id, this.now(), tx);
-            if (change.quantity < reserved) {
+            if (reserved > 0 && change.quantity < reserved) {
                 throw new AppError(400, `Stock disponible insuficiente. Hay ${Math.max(0, change.previousQuantity - reserved)} unidades disponibles`);
             }
         }
