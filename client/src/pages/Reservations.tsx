@@ -66,7 +66,7 @@ export default function Reservations({ stores }: Props) {
   return <section className="management-section">
     <div className="section-heading"><div><h3>Reservas</h3><p>Creá, consultá, cancelá y registrá el retiro de reservas.</p></div></div>
     {error && <p className="notice notice-error">{error}</p>}{success && <p className="notice notice-success">{success}</p>}
-    <form className="management-form" onSubmit={create}>
+    <form className="management-form" onSubmit={create} noValidate>
       <h4>Nueva reserva</h4>
       <label>Sucursal</label><select value={storeId} onChange={e=>setStoreId(e.target.value)} required><option value="">Seleccioná sucursal</option>{activeStores.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select>
       <label>Producto</label><select value={productId} onChange={e=>setProductId(e.target.value)} required><option value="">Seleccioná producto</option>{products.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select>

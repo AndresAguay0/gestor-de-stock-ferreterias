@@ -434,24 +434,27 @@ export default function StockManagement({ stores }: Props) {
         {!isEmployee && <form className="management-form" onSubmit={createProduct}>
           <h4>Agregar producto</h4>
 
-          <label>Nombre</label>
+          <label htmlFor="product-name">Nombre</label>
           <input
+            id="product-name"
             value={productName}
             onChange={(event) => setProductName(event.target.value)}
             maxLength={150}
             required
           />
 
-          <label>Categoría</label>
+          <label htmlFor="product-category">Categoría</label>
           <input
+            id="product-category"
             value={category}
             onChange={(event) => setCategory(event.target.value)}
             maxLength={100}
             required
           />
 
-          <label>Unidad</label>
+          <label htmlFor="product-unit">Unidad</label>
           <select
+            id="product-unit"
             value={unit}
             onChange={(event) => setUnit(event.target.value as Unit)}
           >
@@ -462,8 +465,9 @@ export default function StockManagement({ stores }: Props) {
             ))}
           </select>
 
-          <label>Precio unitario ($)</label>
+          <label htmlFor="product-price">Precio unitario ($)</label>
           <input
+            id="product-price"
             type="number"
             min="0"
             step="0.01"
@@ -472,8 +476,9 @@ export default function StockManagement({ stores }: Props) {
             required
           />
 
-          <label>SKU (opcional)</label>
+          <label htmlFor="product-sku">SKU (opcional)</label>
           <input
+            id="product-sku"
             value={sku}
             onChange={(event) => setSku(event.target.value)}
             maxLength={64}
@@ -613,49 +618,68 @@ export default function StockManagement({ stores }: Props) {
         )}
       </div>
 
-      <div className="stock-table-wrap">
-        <h4>Historial de movimientos</h4>
-        <p className="form-help">
-          Últimos 50 movimientos{validSelectedStore ? ' de la sucursal seleccionada' : ' de todas las sucursales'}.
-        </p>
+      {!isEmployee && (
+        <div className="stock-table-wrap">
+          <h4>Historial de movimientos</h4>
+          <p className="form-help">
+            Últimos 50 movimientos
+            {validSelectedStore
+              ? ' de la sucursal seleccionada'
+              : ' de todas las sucursales'}.
+          </p>
 
-        {loading ? (
-          <p className="empty-state">Cargando movimientos...</p>
-        ) : movementHistory.length === 0 ? (
-          <p className="empty-state">No hay movimientos para mostrar.</p>
-        ) : (
-          <table className="stock-table">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Producto</th>
-                <th>Sucursal</th>
-                <th>Tipo</th>
-                <th>Motivo</th>
-                <th>Cantidad</th>
-                <th>Stock resultante</th>
-                <th>Usuario</th>
-                <th>Observación</th>
-              </tr>
-            </thead>
-            <tbody>
-              {movementHistory.map((movement) => (
-                <tr key={movement.id}>
-                  <td>{formatMovementDate(movement.createdAt)}</td>
-                  <td>{movement.product?.name ?? `Producto #${movement.productId}`}</td>
-                  <td>{movement.store?.name ?? `Sucursal #${movement.storeId}`}</td>
-                  <td>{movement.type === 'in' ? 'Ingreso' : movement.type === 'out' ? 'Egreso' : 'Ajuste'}</td>
-                  <td>{formatMovementReason(movement.reason)}</td>
-                  <td>{movement.quantity} {movement.product?.unit ?? ''}</td>
-                  <td>{movement.resultingQuantity} {movement.product?.unit ?? ''}</td>
-                  <td>{movement.user?.email ?? `Usuario #${movement.userId}`}</td>
-                  <td>{movement.note || '—'}</td>
+          {loading ? (
+            <p className="empty-state">Cargando movimientos...</p>
+          ) : movementHistory.length === 0 ? (
+            <p className="empty-state">No hay movimientos para mostrar.</p>
+          ) : (
+            <table className="stock-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Producto</th>
+                  <th>Sucursal</th>
+                  <th>Tipo</th>
+                  <th>Motivo</th>
+                  <th>Cantidad</th>
+                  <th>Stock resultante</th>
+                  <th>Usuario</th>
+                  <th>Observación</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+              </thead>
+              <tbody>
+                {movementHistory.map((movement) => (
+                  <tr key={movement.id}>
+                    <td>{formatMovementDate(movement.createdAt)}</td>
+                    <td>
+                      {movement.product?.name ?? `Producto #${movement.productId}`}
+                    </td>
+                    <td>
+                      {movement.store?.name ?? `Sucursal #${movement.storeId}`}
+                    </td>
+                    <td>
+                      {movement.type === 'in'
+                        ? 'Ingreso'
+                        : movement.type === 'out'
+                          ? 'Egreso'
+                          : 'Ajuste'}
+                    </td>
+                    <td>{formatMovementReason(movement.reason)}</td>
+                    <td>{movement.quantity} {movement.product?.unit ?? ''}</td>
+                    <td>
+                      {movement.resultingQuantity} {movement.product?.unit ?? ''}
+                    </td>
+                    <td>
+                      {movement.user?.email ?? `Usuario #${movement.userId}`}
+                    </td>
+                    <td>{movement.note || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
 
       {!isEmployee && <div className="stock-table-wrap">
         <h4>Administrar productos</h4>
