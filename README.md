@@ -37,7 +37,7 @@ docs/      documentación técnica y de la API
 
 ## Tecnología
 
-**Backend:** Node.js, Express 5, TypeScript, Sequelize 6 con SQLite, zod (validación), umzug (migraciones), jose (JWT) y bcryptjs (contraseñas).
+**Backend:** Node.js, Express 5, TypeScript, Sequelize 6 con SQLite, zod (validación), umzug (migraciones), jose (JWT), bcryptjs (contraseñas), Vitest y Supertest (pruebas automáticas).
 
 **Frontend:** React, TypeScript, Vite, HTML y CSS.
 
