@@ -53,6 +53,10 @@ El frontend espera que el backend esté disponible en `http://localhost:4000`, s
 | Comando | Para qué |
 | --- | --- |
 | `npm run dev` | Iniciar el servidor de desarrollo de Vite |
+| `npm test` | RECOMENDADO - Correr todas las pruebas automáticas (esto está declarado en el script "test" dentro del package.json) |
+| `npx vitest run tests/integration` | Correr las pruebas de integración (Vitest) |
+| `npx vitest run tests/unit` | Correr las pruebas unitarias (Vitest) |
+| `npx vitest run` | Correr todas las pruebas (Vitest) |
 | `npm run build` | Verificar los tipos y generar la versión compilada |
 | `npm run lint` | Ejecutar el análisis estático del código |
 
@@ -61,23 +65,34 @@ El frontend espera que el backend esté disponible en `http://localhost:4000`, s
 ```text
 client/
 └── src/
-    ├── main.tsx                  Entrada de la aplicación
-    ├── App.tsx                   Raíz: sesión y navegación básica
-    ├── App.css                   Estilos de la aplicación
-    ├── index.css                 Estilos globales
-    ├── auth/
-    │   └── AuthContext.tsx       Contexto y funciones de autenticación
-    ├── api/
-    │   ├── client.ts             Peticiones HTTP y manejo de errores
-    │   ├── auth.api.ts           Operaciones relacionadas con autenticación
-    │   └── management.api.ts     Operaciones de gestión y tipos de datos
-    └── pages/
-        ├── Login.tsx             Inicio de sesión
-        ├── Dashboard.tsx         Panel y navegación entre secciones
-        ├── StockManagement.tsx   Productos, inventario y movimientos
-        ├── Reservations.tsx      Reservas
-        ├── Notifications.tsx     Notificaciones
-        └── Settings.tsx          Configuración
+|   ├── main.tsx                        Entrada de la aplicación
+|   ├── App.tsx                         Raíz: sesión y navegación básica
+|   ├── App.css                         Estilos de la aplicación
+|   ├── index.css                       Estilos globales
+|   ├── auth/
+|   │   └── AuthContext.tsx             Contexto y funciones de autenticación
+|   ├── api/
+|   │   ├── client.ts                   Peticiones HTTP y manejo de errores
+|   │   ├── auth.api.ts                 Operaciones relacionadas con autenticación
+|   │   └── management.api.ts           Operaciones de gestión y tipos de datos
+|   └── pages/
+|       ├── Login.tsx                   Inicio de sesión
+|       ├── Dashboard.tsx               Panel y navegación entre secciones
+|       ├── StockManagement.tsx         Productos, inventario y movimientos
+|       ├── Reservations.tsx            Reservas
+|       ├── Notifications.tsx           Notificaciones
+|       └── Settings.tsx                Configuración
+└── tests/ 
+    ├── integration/
+    |   ├── dashboard.test.tsx          Pruebas de carga de sucursales, gestión de usuarios, permisos según roles y cierre de sesión
+    |   ├── notifications.test.tsx      Pruebas de visualización de notificaciones, estados y acciones disponibles
+    |   ├── reservations.test.tsx       Pruebas de listado, creación, validaciones y gestión de reservas
+    |   ├── settings.test.tsx           Pruebas de actualización y visualización de configuraciones
+    |   └── stockManagement.test.tsx    Pruebas de gestión de productos, inventario, movimientos y validaciones
+    ├── unit/
+    |   ├── api.client.test.ts          Pruebas de peticiones HTTP, encabezados, respuestas y manejo de errores
+    |   └── authContext.tsx             Pruebas de autenticación, recuperación, inicio y cierre de sesión
+    └── setup.ts                        Configuración general de testing (Frontend)
 ```
 
 ## Cómo se organiza
