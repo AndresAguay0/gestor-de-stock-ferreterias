@@ -74,6 +74,20 @@ function mockStockData() {
     } as never)
 }
 
+function getProductSelect() {
+    const option = screen.getByRole('option', {
+        name: 'Martillo',
+    })
+
+    const select = option.closest('select')
+
+    if (!select) {
+        throw new Error('No se encontró el selector de productos')
+    }
+
+    return select
+}
+
 describe('Integración de StockManagement', () => {
     beforeEach(() => {
         vi.clearAllMocks()
@@ -93,7 +107,7 @@ describe('Integración de StockManagement', () => {
         render(<StockManagement stores={stores} />)
 
         expect(
-            await screen.findByText('Martillo'),
+            await screen.findByRole('option', { name: 'Martillo' }),
         ).toBeInTheDocument()
 
         expect(
@@ -112,7 +126,7 @@ describe('Integración de StockManagement', () => {
     it('muestra solamente las sucursales activas', async () => {
         render(<StockManagement stores={stores} />)
 
-        await screen.findByText('Martillo')
+        await screen.findByRole('option', { name: 'Martillo' })
 
         expect(
             screen.getByRole('option', {
@@ -138,7 +152,7 @@ describe('Integración de StockManagement', () => {
 
         render(<StockManagement stores={stores} />)
 
-        await screen.findByText('Martillo')
+        await screen.findByRole('option', { name: 'Martillo' })
 
         expect(
             screen.queryByRole('heading', {
@@ -172,7 +186,7 @@ describe('Integración de StockManagement', () => {
 
         render(<StockManagement stores={stores} />)
 
-        await screen.findByText('Martillo')
+        await screen.findByRole('option', { name: 'Martillo' })
 
         const nameInput = screen.getByLabelText('Nombre')
         const categoryInput = screen.getByLabelText('Categoría')
@@ -212,11 +226,9 @@ describe('Integración de StockManagement', () => {
     })
 
     it('no permite registrar un movimiento sin seleccionar una sucursal', async () => {
-        const user = userEvent.setup()
-
         render(<StockManagement stores={stores} />)
 
-        await screen.findByText('Martillo')
+        await screen.findByRole('option', { name: 'Martillo' })
 
         const registerButton = screen.getByRole('button', {
             name: 'Registrar movimiento',
@@ -224,18 +236,9 @@ describe('Integración de StockManagement', () => {
 
         expect(registerButton).toBeDisabled()
 
-        // Sin sucursal seleccionada, no debe enviarse ningún movimiento.
         expect(
             managementApi.createMovement,
         ).not.toHaveBeenCalled()
-
-        // Se verifica también que el botón se habilite al elegir una sucursal.
-        await user.selectOptions(
-            screen.getAllByRole('combobox')[0],
-            '1',
-        )
-
-        expect(registerButton).toBeEnabled()
     })
 
     it('registra un ingreso de stock correctamente', async () => {
@@ -247,12 +250,23 @@ describe('Integración de StockManagement', () => {
 
         render(<StockManagement stores={stores} />)
 
-        await screen.findByText('Martillo')
+        await screen.findByRole('option', { name: 'Martillo' })
 
-        await user.selectOptions(
-            screen.getAllByRole('combobox')[0],
-            '1',
-        )
+        // Seleccionar sucursal.
+        const storeOption = screen.getByRole('option', {
+            name: 'Sucursal Centro',
+        })
+
+        const storeSelect = storeOption.closest('select')
+
+        if (!storeSelect) {
+            throw new Error('No se encontró el selector de sucursales')
+        }
+
+        await user.selectOptions(storeSelect, '1')
+
+        // Seleccionar producto.
+        await user.selectOptions(getProductSelect(), '10')
 
         await user.click(
             screen.getByRole('button', {

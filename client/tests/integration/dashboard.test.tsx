@@ -81,7 +81,7 @@ const employee = {
     role: 'employee',
 } as never
 
-function renderDashboard(user = owner) {
+function renderDashboard() {
     return render(<Dashboard onLogout={vi.fn()} />)
 }
 

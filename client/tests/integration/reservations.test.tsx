@@ -9,6 +9,7 @@ import {
     render,
     screen,
     waitFor,
+    within,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -89,12 +90,14 @@ describe('Integración de Reservations', () => {
             await screen.findByText('Reserva #100'),
         ).toBeInTheDocument()
 
+        const reservationCard = screen.getByRole('article')
+
         expect(
-            screen.getByText('Martillo'),
+            within(reservationCard).getByText('Martillo'),
         ).toBeInTheDocument()
 
         expect(
-            screen.getByText('Sucursal Centro'),
+            within(reservationCard).getByText('Sucursal Centro'),
         ).toBeInTheDocument()
 
         expect(
