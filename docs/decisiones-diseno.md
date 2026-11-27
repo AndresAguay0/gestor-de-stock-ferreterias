@@ -20,6 +20,7 @@ Para ver cómo está armado el código, la [documentación técnica](documentaci
 | 10 | Fuerza bruta de contraseñas | Límite de intentos fallidos | No frena ataques desde muchas direcciones |
 | 11 | Bajas | Desactivar en lugar de borrar | Los datos se acumulan |
 | 12 | Arquitectura | Capas con inyección manual de dependencias | Más archivos y conexión manual |
+| 13 | Pruebas automáticas | Vitest y Supertest sobre SQLite temporal por archivo | Más lentas que mocks en memoria y requieren procesos aislados |
 
 ## 1. Motor de base de datos: SQLite
 
@@ -235,3 +236,18 @@ Siguen sin implementarse porque hoy no hay un problema concreto que resuelvan:
 - **Factory para las formas de facturar una venta.** Si aparecen varias formas de emitir una factura, una Factory permitiría crearlas de manera uniforme.
 - **Tabla de eventos pendientes** si los avisos pasan a ser críticos (decisión 7).
 - **Otro motor de base de datos** si el sistema pasa a atender a varias instalaciones o necesita más de un proceso (decisión 1).
+
+## 13. Pruebas automáticas: integración contra SQLite real por archivo
+
+**Contexto.** Gran parte de la lógica crítica del backend vive en la interacción entre capas: validación con zod, permisos por rol y local, restricciones de base de datos (claves únicas, `RESTRICT`) y serialización de escrituras en `TransactionRunner`. Probar solo funciones aisladas con mocks dejaría sin verificar esas garantías.
+
+**Alternativas.**
+- *Solo pruebas unitarias con repositories simulados:* rápidas, pero no prueban ni las consultas de Sequelize, ni las migraciones, ni las carreras entre pedidos simultáneos.
+- *Una única base SQLite compartida entre todos los archivos de prueba:* obligaría a limpiar tablas entre casos y acoplaría el orden de ejecución.
+- *Vitest con procesos separados (`forks`) y una base SQLite temporal por archivo, más pruebas unitarias para lógica pura.*
+
+**Decisión.** Se usa **Vitest** con `pool: "forks"`. Cada archivo de integración recibe su propia carpeta temporal con una base SQLite limpia a la que se le aplican las migraciones reales (`umzug`) antes de correr, y se prueba de extremo a extremo vía HTTP con **Supertest** sin abrir puertos de red. La lógica pura y sin dependencias (como el escalado de cantidades y los umbrales de stock mínimo) se cubre con pruebas unitarias.
+
+**Costos asumidos.**
+- Cada archivo de integración aplica todas las migraciones y hace hashing con bcrypt (costo 12) al crear usuarios de prueba, por lo que la suite tarda algunos segundos en lugar de milisegundos.
+- Como el servidor usa módulos con estado en memoria (la instancia de Sequelize y los contadores de `rateLimit`), es obligatorio ejecutar los archivos en procesos aislados (`forks`) para que no interfieran entre sí.

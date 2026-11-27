@@ -11,11 +11,11 @@ API REST del sistema. Permite que una ferretería con varios locales de un mismo
 - **Roles** (empleado, gerente y dueño) con permisos por local.
 - **Configuración** del negocio.
 
-**Estado actual:** las funciones principales del backend están completas. Todavía no hay pruebas automáticas. El detalle de las limitaciones está en la [documentación técnica](../docs/documentacion-backend.md#6-limitaciones-conocidas).
+**Estado actual:** las funciones principales del backend están completas y cuentan con pruebas automáticas unitarias y de integración con Vitest y Supertest (`tests/unit` y `tests/integration`). El detalle de las limitaciones está en la [documentación técnica](../docs/documentacion-backend.md#6-limitaciones-conocidas).
 
 ## Tecnología
 
-Node.js, Express 5, TypeScript (modo estricto, módulos ES), Sequelize 6 con SQLite, zod (validación), umzug (migraciones), jose (JWT), bcryptjs (contraseñas), helmet y express-rate-limit (seguridad).
+Node.js, Express 5, TypeScript (modo estricto, módulos ES), Sequelize 6 con SQLite, zod (validación), umzug (migraciones), jose (JWT), bcryptjs (contraseñas), helmet y express-rate-limit (seguridad), y Vitest + Supertest (pruebas).
 
 ## Requisitos
 
@@ -60,11 +60,19 @@ El servidor queda en `http://localhost:4000` (el puerto se cambia con `PORT` en 
 
 El resto de las rutas están en la [referencia de la API](../docs/referencia-api.md): empiezan con `POST /api/auth/login`, que devuelve el token que se manda en el resto de los pedidos.
 
+## Pruebas automáticas
+Dentro de `server/`, las pruebas se ejecutan con Vitest:
+```bash
+npm test
+```
+También podés correr solo unitarias (`npm run test:unit`), solo de integración (`npm run test:integration`), en modo observación (`npm run test:watch`) o con cobertura (`npm run test:coverage`). Cada archivo de prueba usa su propia base SQLite temporal y corre en procesos separados.
+
 ## Comandos más usados
 
 | Comando | Para qué |
 | --- | --- |
 | `npm run dev` | Servidor en desarrollo con recarga automática |
+| `npm test` | Correr todas las pruebas automáticas (Vitest) |
 | `npm run typecheck` | Chequear los tipos |
 | `npm run build` y `npm start` | Compilar a `dist/` y arrancar la versión compilada |
 | `npm run migrate:status` | Ver qué migraciones están aplicadas y cuáles faltan |
@@ -96,6 +104,11 @@ server/
     shared/         utilidades comunes
     scripts/        create-owner y reset-owner-password
     modules/        un directorio por funcionalidad
+    tests/
+      setup.ts        base SQLite temporal por archivo y silenciado de logs
+      helpers.ts      cliente Supertest y fábricas de datos para pruebas
+      unit/           pruebas unitarias
+      integration/    pruebas de integración con Supertest
 ```
 
 Si querés cambiar algo, empezá por acá:

@@ -9,9 +9,15 @@ Todos los comandos se corren con `npm run <comando>`, parado en `server/`.
 | Comando | Función |
 | --- | --- |
 | `dev` | Levanta el servidor en desarrollo con recarga automática |
+| `clean` | Borra la carpeta `dist/` |
 | `build` | Borra `dist/` y compila el proyecto (si hay un error de tipos, no compila) |
 | `start` | Arranca la versión compilada (`node dist/index.js`); hay que haber corrido `build` |
-| `typecheck` | Chequea los tipos |
+| `typecheck` | Chequea los tipos en `src/` y en `tests/` |
+| `test` | Corre toda la suite de pruebas con Vitest (`vitest run`) |
+| `test:unit` | Corre solo las pruebas unitarias (`tests/unit`) |
+| `test:integration` | Corre solo las pruebas de integración (`tests/integration`) |
+| `test:coverage` | Corre las pruebas y genera el reporte de cobertura (`v8`, en consola y HTML) |
+| `test:watch` | Corre Vitest en modo observación para desarrollo |
 | `migrate`, `migrate:down`, `migrate:status` | Aplica las migraciones, revierte la última, muestra el estado |
 | `migrate:prod` | Aplica las migraciones con la versión compilada |
 | `create-owner`, `create-owner:prod` | Crea el primer dueño (las versiones `:prod` usan lo compilado, sin `tsx`) |
@@ -52,6 +58,12 @@ server/
     models/               un archivo por tabla, e index.ts que los carga todos
     shared/               utilidades comunes
     scripts/              create-owner, reset-owner-password y prompt
+    tests/
+        tsconfig.json         configuración de tipos para las pruebas
+        setup.ts              base SQLite temporal por archivo y silenciado de logs
+        helpers.ts            cliente Supertest y fábricas de datos (dueño, locales, usuarios, productos)
+        unit/                 pruebas unitarias de funciones puras
+        integration/          pruebas de extremo a extremo contra la app Express y
     modules/
       auth/  users/  stores/  products/  inventory/  stock-movements/
       reservations/  notifications/  settings/
@@ -195,9 +207,29 @@ Un cliente pide un producto que el local A no tiene y el B sí. El empleado de A
 
 Hay una única fila de configuración (id 1), creada por una migración: el nombre del negocio y la duración por defecto de las reservas (120 minutos; entre 1 y 4320). Cualquiera puede leerla y solo el dueño la cambia.
 
-## 5. Cómo funciona por dentro
+## 5. Pruebas automáticas
 
-### 5.1 Qué recorre un pedido
+Las pruebas corren con **Vitest** (`vitest.config.ts`) y **Supertest**. Para evitar conflictos con el singleton de Sequelize y los límites de intentos en memoria, cada archivo de prueba se ejecuta en su propio proceso (`pool: "forks"`).
+
+- **Aislamiento de base de datos (`tests/setup.ts`):** antes de cargar `config/env.ts`, crea un directorio temporal con una base SQLite propia para ese archivo, aplica las migraciones reales con `umzug` (`useTestDatabase()` en `tests/helpers.ts`), silencia los logs de consola durante la corrida y borra la carpeta temporal al terminar.
+- **Pruebas de integración sin puerto:** `tests/helpers.ts` instancia `createApp()` y ejecuta los pedidos HTTP en memoria con `supertest`, usando la aplicación, los middlewares, los servicios y la base SQLite reales.
+- **Cobertura (`npm run test:coverage`):** usa el proveedor `v8` sobre `src/**/*.ts`, excluyendo el punto de entrada y los scripts de administración (`src/index.ts`, `src/scripts/**`, `src/db/migrate.ts` y `src/db/migrations/**`).
+
+### Qué está cubierto hoy
+
+| Carpeta / Archivo | Tipo | Qué verifica |
+| --- | --- | --- |
+| `tests/unit/quantity.test.ts` | Unitaria | Conversión a enteros escalados (`toStored`, `fromStored`), redondeo en punto flotante, límites de decimales por unidad y cálculo de `isBelowMinimum` (incluyendo stock negativo y mínimo en 0) |
+| `tests/integration/errors.test.ts` | Integración | Respuesta 404 estándar para rutas inexistentes, 400 ante JSON malformado, ruta raíz pública y presencia de encabezados de seguridad (`helmet`, sin `X-Powered-By`) |
+| `tests/integration/auth.test.ts` | Integración | Login, normalización de email, respuestas idénticas ante email inexistente o clave errónea, bloqueo a usuarios desactivados, invalidación inmediata de sesiones al desactivar o cambiar contraseña y límite de intentos fallidos (`429` con `Retry-After`) |
+| `tests/integration/stores.test.ts` | Integración | Creación y edición de locales (solo dueño), validación de longitudes y espacios, ocultamiento de locales desactivados a empleados y visibilidad con `includeInactive` para gerentes y dueños |
+| `tests/integration/users.test.ts` | Integración | Visibilidad jerárquica por rol y local (`404` para usuarios ajenos), creación/edición de empleados y gerentes, protección de dueños ante cambios por API, reasignación de locales, efecto inmediato del cambio de rol y reseteo de contraseñas |
+| `tests/integration/products.test.ts` | Integración | Permisos de catálogo, normalización de SKU a mayúsculas, unicidad de SKU y código de barras, validación de precios en centavos y unidades inmutables, borrado de campos opcionales con `null`, búsqueda por palabras/SKU/barcode/categoría, paginación y baja lógica |
+| `tests/integration/movements.test.ts` | Integración | Ingresos, egresos, stock negativo con aviso (`negativeStock`, `belowMinimum`), recuentos (`adjustment`), idempotencia por `clientRef` (`409`), concurrencia (10 ingresos simultáneos serializados por la cola de transacciones) y restricciones de rol, local y decimales |
+
+## 6. Cómo funciona por dentro
+
+### 6.1 Qué recorre un pedido
 
 Muestra por dónde pasa un pedido y quién habla con quién.
 
@@ -214,7 +246,7 @@ flowchart TD
     notif --> repo
 ```
 
-### 5.2 Registrar un movimiento de stock
+### 6.2 Registrar un movimiento de stock
 
 Muestra por qué el aviso de stock bajo llega después de la respuesta: el evento se emite recién cuando la transacción ya se confirmó.
 
@@ -237,7 +269,7 @@ sequenceDiagram
     N->>D: crea los avisos si el stock cruzó el mínimo hacia abajo
 ```
 
-### 5.3 Ciclo de vida de una reserva
+### 6.3 Ciclo de vida de una reserva
 
 El estado `expired` no se guarda en la base: se calcula al consultar.
 
@@ -252,7 +284,7 @@ stateDiagram-v2
     cancelled --> [*]
 ```
 
-## 6. Limitaciones conocidas
+## 7. Limitaciones conocidas
 
 - SQLite admite un solo escritor (por eso el encolado de transacciones) y su búsqueda no ignora los acentos. Hay que correr un solo proceso del servidor: dos procesos contra el mismo archivo se pisarían. No se usa el modo WAL.
 - No hay copias de seguridad automáticas de la base.
@@ -263,7 +295,7 @@ stateDiagram-v2
 - Un gerente puede cambiar precios y dar de baja productos, que son globales, y no queda registro de quién lo hizo.
 - Faltan las transferencias entre locales.
 
-## 7. Cómo agregar una funcionalidad
+## 8. Cómo agregar una funcionalidad
 
 1. Si cambian las tablas: una migración nueva en `src/db/migrations/` (nombre con fecha y hora, posterior a la última; las ya aplicadas no se editan), el modelo en `src/models/` y su línea en `src/models/index.ts`.
 2. Esquemas de zod en `<módulo>.schema.ts`.
