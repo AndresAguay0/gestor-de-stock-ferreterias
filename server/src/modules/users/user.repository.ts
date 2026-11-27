@@ -1,0 +1,109 @@
+import { Op, Transaction, type IncludeOptions } from "sequelize";
+import { HardwareStore } from "../../models/HardwareStore.js";
+import { User, type UserRole } from "../../models/User.js";
+import { UserStore } from "../../models/UserStore.js";
+
+const includeStores: IncludeOptions = {
+    model: HardwareStore,
+    as: "stores",
+    through: { attributes: [] },
+};
+
+export interface NewUserData {
+    email: string;
+    passwordHash: string;
+    role: UserRole;
+}
+
+export interface UserChanges {
+    email?: string;
+    role?: UserRole;
+    isActive?: boolean;
+}
+
+export class UserRepository {
+    findAll(options: { includeInactive: boolean }, tx?: Transaction) {
+        return User.findAll({
+            where: options.includeInactive ? {} : { isActive: true },
+            include: [includeStores],
+            order: [["email", "ASC"]],
+            transaction: tx,
+        });
+    }
+
+    findById(id: number, tx?: Transaction) {
+        return User.findByPk(id, { include: [includeStores], transaction: tx });
+    }
+
+    findByEmail(email: string, tx?: Transaction) {
+        return User.findOne({ where: { email }, transaction: tx });
+    }
+    
+    async findActiveEmployeesInStore(storeIds: number[], tx?: Transaction) {
+        if (storeIds.length === 0) return [];
+
+        return User.findAll({
+            where: {role: "employee", isActive: true },
+            include: [{ ...includeStores, where: { id: storeIds }, required: true }],
+            order: [["email", "ASC"]],
+            transaction: tx,
+        });
+    }
+
+    findActiveOwners(tx?: Transaction) {
+        return User.findAll({
+            where: { role: "owner", isActive: true },
+            order: [["email", "ASC"]],
+            transaction: tx,
+        });
+    }
+
+    findActiveManagersInStore(storeId: number, tx?: Transaction) {
+        return User.findAll({
+            where: { role: "manager", isActive: true },
+            include: [{ ...includeStores, where: { id: storeId }, required: true }],
+            order: [["email", "ASC"]],
+            transaction: tx,
+        });
+    }
+
+    findByEmailWithPassword(email: string, tx?: Transaction) {
+        return User.scope("withPassword").findOne({ where: { email }, transaction: tx });
+    }
+
+    findByIdWithPassword(id: number, tx?: Transaction) {
+        return User.scope("withPassword").findByPk(id, { transaction: tx });
+    }
+
+    async setPassword(id: number, passwordHash: string, tx?: Transaction) {
+        const user = await User.findByPk(id, { transaction: tx });
+        if (!user) return null;
+        await user.update({ passwordHash, tokenVersion: user.tokenVersion + 1}, { transaction: tx });
+        return user.tokenVersion;
+    }
+
+    async existsByEmail(email: string, excludeId?: number, tx?: Transaction) {
+        const count = await User.count({
+            where: excludeId === undefined ? { email } : { email, id: { [Op.ne]: excludeId } },
+            transaction: tx,
+        });
+        return count > 0;
+    }
+    
+    create(data: NewUserData, tx?: Transaction) {
+        return User.create(data, { transaction: tx });
+    }
+
+    async update(id: number, changes: UserChanges, tx?: Transaction) {
+        const user = await User.findByPk(id, { transaction: tx });
+        if (!user) return null;
+        return user.update(changes, { transaction: tx });
+    }
+
+    async replaceStores(userId: number, storeIds: number[], tx?: Transaction) {
+        await UserStore.destroy({ where: { userId }, transaction: tx });
+        await UserStore.bulkCreate(
+            storeIds.map((hardwareStoreId) => ({ userId, hardwareStoreId })), { transaction: tx },
+        );
+    }
+}

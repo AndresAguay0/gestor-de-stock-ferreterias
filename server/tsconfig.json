@@ -4,12 +4,14 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "lib": ["ESNext"],
+    "types": ["node"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "noEmitOnError": true,
   },
   "include": ["src/**/*"]
 }

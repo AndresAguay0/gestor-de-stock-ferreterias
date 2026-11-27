@@ -4,7 +4,7 @@ node_modules/
 # Archivos SQL
 *.sqlite
 *.sqlite3
-database.sqlite
+database.sqlite*
 
 # Compilaciones y builds
 dist/
@@ -13,6 +13,7 @@ build/
 # Herramientas
 .vite/
 .eslintcache
+coverage/
 
 # Variables de entorno
 .env
@@ -25,3 +26,5 @@ build/
 Thumbs.db
 .vscode/
 .idea/
+
+test-**.sh
